@@ -6,6 +6,7 @@ import java.text.ParseException;
 import se.sics.isl.util.IllegalConfigurationException;
 import se.sics.tasim.logtool.LogHandler;
 import se.sics.tasim.logtool.LogReader;
+import trainer.Constants.LogBidBundleReportParams;
 import trainer.Constants.LogQueryReportParams;
 import trainer.Constants.LogQueryType;
 import trainer.Constants.LogSalesReportParams;
@@ -49,6 +50,16 @@ public class GameLogHandler extends LogHandler
 		for (int i = 0; i < impressionsResults.length; i++)
 		{
 			System.out.println(impressionsResults[i]);
+		}
+		
+		System.out.println("*******************************************************************");
+		System.out.println("All particiants bid bundle reports " + GameLogDataStruct.getInstance().getGamesReports().get(218).getBidBundleReport().getAllParticipantsBidBundleReports().keySet().toString());
+		System.out.println("All of myAgent bid bundle reports " + GameLogDataStruct.getInstance().getGamesReports().get(218).getBidBundleReport().getSpecificParticipantAllBidBundleReport("myAgent").keySet().toString());
+		System.out.println("Participant bid bundle Report my myAgent, query p_d:");
+		String[] bidResults = GameLogDataStruct.getInstance().getGamesReports().get(218).getBidBundleReport().getSpecificParticipantAllBidBundleReport("myAgent").get(LogQueryType.p_d).get(LogBidBundleReportParams.bid);
+		for (int i = 0; i < bidResults.length; i++)
+		{
+			System.out.println(bidResults[i]);
 		}
 	}
 
