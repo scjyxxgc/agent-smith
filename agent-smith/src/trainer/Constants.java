@@ -8,4 +8,6 @@ public class Constants
 	public enum LogSalesReportParams {impressions, revenue}
 	public enum LogBidBundleReportParams {ad, bid, limit}
 	public enum LogRetailCatalogReportParams {salesProfit}
+	public enum LogSlotInfoReportParams {promotedSlots, regularSlots, promotedSlotBonus}
+	public enum LogUserClickModelReportParams {advertiserEffect, continuationProbability}
 }
