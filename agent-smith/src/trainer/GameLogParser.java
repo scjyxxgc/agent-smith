@@ -64,7 +64,9 @@ public class GameLogParser extends Parser
 		myGameLogDataStruct.getGamesReports().get(simulationId).createBidBundleReport();
 		myGameLogDataStruct.getGamesReports().get(simulationId).createRetailCatalogReport();
 		myGameLogDataStruct.getGamesReports().get(simulationId).createSlotInfoReport();
-		myGameLogDataStruct.getGamesReports().get(simulationId).createUserClickModelReportReport();
+		myGameLogDataStruct.getGamesReports().get(simulationId).createUserClickModelReport();
+		myGameLogDataStruct.getGamesReports().get(simulationId).createReserveInfoReportLog();
+		myGameLogDataStruct.getGamesReports().get(simulationId).createPublisherInfoReportLog();
 		
 		int agent;
 		participantNames = new String[participants.length];
@@ -134,46 +136,24 @@ public class GameLogParser extends Parser
 	private void UCMparse(UserClickModel ucm, int sender, int receiver)
 	{
 		DecimalFormat twoPlaces = new DecimalFormat("0.00");
-//		outLog.println(day + ": " + participantNames[sender] + "->" + participantNames[receiver] + "   UserClickModel: (AdvertiserEffect)");
-//		String advs = "\t ";
 		for (int a = 0; a < ucm.advertiserCount(); a++)
-		{
-			for (int i = 0; i < ucm.queryCount(); i++)
-			{	
-				myGameLogDataStruct.getGamesReports().get(simulationId).getUserClickModelReportReport().addParticipantUserClickModelAdvertiserEffectReport(ucm.advertiser(a), QueryToEnum(ucm.query(i)), day, twoPlaces.format(ucm.getAdvertiserEffect(i, a)));				
-				
-//				advs += ucm.advertiser(a) + "    \t";
-			}
-		}
-//		advs += "Continuation Probability";
-//		outLog.println(advs);
+			for (int i = 0; i < ucm.queryCount(); i++)	
+				myGameLogDataStruct.getGamesReports().get(simulationId).getUserClickModelReport().addParticipantUserClickModelAdvertiserEffectReport(ucm.advertiser(a), QueryToEnum(ucm.query(i)), day, twoPlaces.format(ucm.getAdvertiserEffect(i, a)));	
 
 		for (int i = 0; i < ucm.queryCount(); i++)
-		{
-//			String qstr = " ";
-			for (int a = 0; a < ucm.advertiserCount(); a++)
-			{
-//				qstr += twoPlaces.format(ucm.getAdvertiserEffect(i, a)) + "        ";
-			}
-//			qstr += twoPlaces.format(ucm.getContinuationProbability(i));
-		
-			myGameLogDataStruct.getGamesReports().get(simulationId).getUserClickModelReportReport().addUserClickModelContinuationProbabilityReport(QueryToEnum(ucm.query(i)), day, ucm.getContinuationProbability(i)+"");
-//			outLog.println(QueryToString(ucm.query(i)) + qstr);
-		}
+			myGameLogDataStruct.getGamesReports().get(simulationId).getUserClickModelReport().addUserClickModelContinuationProbabilityReport(QueryToEnum(ucm.query(i)), day, ucm.getContinuationProbability(i)+"");
 	}
 
 	private void RIparse(ReserveInfo ri, int sender, int receiver)
 	{
 		DecimalFormat twoPlaces = new DecimalFormat("0.00");
-//		outLog.println(day + ": " + participantNames[sender] + "->" + participantNames[receiver] + "   ReserveInfo: p: " + twoPlaces.format(ri.getPromotedReserve()) + ", r: "
-//				+ twoPlaces.format(ri.getRegularReserve()));
+		myGameLogDataStruct.getGamesReports().get(simulationId).getReserveInfoReportLog().addParticipantReserveInfoReport(participantNames[receiver], day, twoPlaces.format(ri.getPromotedReserve()), twoPlaces.format(ri.getRegularReserve()));
 	}
 
 	private void PIparse(PublisherInfo pi, int sender, int receiver)
 	{
 		DecimalFormat twoPlaces = new DecimalFormat("0.00");
-//		outLog.println(day + ": " + participantNames[sender] + "->" + participantNames[receiver] + "   PublisherInfo: squashing parameter: "
-//				+ twoPlaces.format(pi.getSquashingParameter()));
+		myGameLogDataStruct.getGamesReports().get(simulationId).getPublisherInfoReportLog().addParticipantPublisherInfoReport(participantNames[receiver], day, twoPlaces.format(pi.getSquashingParameter()));
 	}
 
 	private void AIparse(AdvertiserInfo ai, int sender, int receiver)

@@ -10,4 +10,6 @@ public class Constants
 	public enum LogRetailCatalogReportParams {salesProfit}
 	public enum LogSlotInfoReportParams {promotedSlots, regularSlots, promotedSlotBonus}
 	public enum LogUserClickModelReportParams {advertiserEffect, continuationProbability}
+	public enum LogReserveInfoReportParams {promotedReserve, regularReserve}
+	public enum LogPublisherInfoReportParams {squashingParameter}
 }
