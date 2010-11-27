@@ -48,6 +48,8 @@ public class GameLogDataStruct
 		RetailCatalogReportLog retailCatalogReport;
 		SlotInfoReportLog slotInfoReport;
 		UserClickModelReportLog userClickModelReport;
+		ReserveInfoReportLog reserveInfoReport;
+		PublisherInfoReportLog publisherInfoReport;
 		
 		public GameReports(int gameId)
 		{
@@ -104,14 +106,34 @@ public class GameLogDataStruct
 			return slotInfoReport;
 		}
 		
-		public void createUserClickModelReportReport()
+		public void createUserClickModelReport()
 		{
 			userClickModelReport = new UserClickModelReportLog();
 		}
 
-		public UserClickModelReportLog getUserClickModelReportReport()
+		public UserClickModelReportLog getUserClickModelReport()
 		{
 			return userClickModelReport;
+		}
+		
+		public void createReserveInfoReportLog()
+		{
+			reserveInfoReport = new ReserveInfoReportLog();
+		}
+
+		public ReserveInfoReportLog getReserveInfoReportLog()
+		{
+			return reserveInfoReport;
+		}
+		
+		public void createPublisherInfoReportLog()
+		{
+			publisherInfoReport = new PublisherInfoReportLog();
+		}
+
+		public PublisherInfoReportLog getPublisherInfoReportLog()
+		{
+			return publisherInfoReport;
 		}
 		
 		/**

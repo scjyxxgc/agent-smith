@@ -8,8 +8,10 @@ import se.sics.tasim.logtool.LogHandler;
 import se.sics.tasim.logtool.LogReader;
 import trainer.Constants.LogBidBundleReportParams;
 import trainer.Constants.LogProduct;
+import trainer.Constants.LogPublisherInfoReportParams;
 import trainer.Constants.LogQueryReportParams;
 import trainer.Constants.LogQueryType;
+import trainer.Constants.LogReserveInfoReportParams;
 import trainer.Constants.LogRetailCatalogReportParams;
 import trainer.Constants.LogSalesReportParams;
 import trainer.Constants.LogSlotInfoReportParams;
@@ -92,21 +94,40 @@ public class GameLogHandler extends LogHandler
 		}
 		
 		System.out.println("\n*************************  User Click Model Reports  ***************************");
-		System.out.println("All particiants User Click Model Advertiser Effectreports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getUserClickModelReportReport().getAllParticipantsUserClickModelAdvertiserEffectReports().keySet().toString());
-		System.out.println("All of Dummy User Click Model Advertiser Effect reports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getUserClickModelReportReport().getSpecificParticipantAllUserClickModelAdvertiserEffectReport("Dummy").keySet().toString());
+		System.out.println("All particiants User Click Model Advertiser Effectreports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getUserClickModelReport().getAllParticipantsUserClickModelAdvertiserEffectReports().keySet().toString());
+		System.out.println("All of Dummy User Click Model Advertiser Effect reports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getUserClickModelReport().getSpecificParticipantAllUserClickModelAdvertiserEffectReport("Dummy").keySet().toString());
 		System.out.println("Participant Slot Info Report Dummy:");
-		String[] userClickModelAdAffectResults = GameLogDataStruct.getInstance().getGamesReports().get(gameId).getUserClickModelReportReport().getSpecificParticipantAllUserClickModelAdvertiserEffectReport("Dummy").get(LogQueryType.p_d).get(LogUserClickModelReportParams.advertiserEffect);
+		String[] userClickModelAdAffectResults = GameLogDataStruct.getInstance().getGamesReports().get(gameId).getUserClickModelReport().getSpecificParticipantAllUserClickModelAdvertiserEffectReport("Dummy").get(LogQueryType.p_d).get(LogUserClickModelReportParams.advertiserEffect);
 		for (int i = 0; i < userClickModelAdAffectResults.length; i++)
 		{
 			System.out.println(userClickModelAdAffectResults[i]);
 		}
 		System.out.println("Continuation Probability for p_d:");
-		String[] userClickModelContinuationProbResults = GameLogDataStruct.getInstance().getGamesReports().get(gameId).getUserClickModelReportReport().getSpecificUserClickModelContinuationProbabilityReport(LogQueryType.p_d).get(LogUserClickModelReportParams.continuationProbability);
+		String[] userClickModelContinuationProbResults = GameLogDataStruct.getInstance().getGamesReports().get(gameId).getUserClickModelReport().getSpecificUserClickModelContinuationProbabilityReport(LogQueryType.p_d).get(LogUserClickModelReportParams.continuationProbability);
 		for (int i = 0; i < userClickModelContinuationProbResults.length; i++)
 		{
 			System.out.println(userClickModelContinuationProbResults[i]);
 		}
 		
+		System.out.println("\n*************************  Reserve Info Reports  ***************************");
+		System.out.println("All particiants Reserve Info reports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getReserveInfoReportLog().getAllParticipantsReserveInfoReports().keySet().toString());
+		System.out.println("All of myAgent Reserve Info reports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getReserveInfoReportLog().getSpecificParticipantAllReserveInfoReport("users").keySet().toString());
+		System.out.println("Participant Reserve Info Report users:");
+		String[] reserveInfoResults = GameLogDataStruct.getInstance().getGamesReports().get(gameId).getReserveInfoReportLog().getSpecificParticipantAllReserveInfoReport("users").get(LogReserveInfoReportParams.regularReserve);
+		for (int i = 0; i < reserveInfoResults.length; i++)
+		{
+			System.out.println(reserveInfoResults[i]);
+		}
+		
+		System.out.println("\n*************************  Publisher Info Reports  ***************************");
+		System.out.println("All particiants Publisher Info reports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getPublisherInfoReportLog().getAllParticipantsPublisherInfoReports().keySet().toString());
+		System.out.println("All of myAgent Publisher Info reports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getPublisherInfoReportLog().getSpecificParticipantAllPublisherInfoReport("myAgent").keySet().toString());
+		System.out.println("Participant Publisher Info Report my myAgent:");
+		String[] publisherInfoResults = GameLogDataStruct.getInstance().getGamesReports().get(gameId).getPublisherInfoReportLog().getSpecificParticipantAllPublisherInfoReport("myAgent").get(LogPublisherInfoReportParams.squashingParameter);
+		for (int i = 0; i < publisherInfoResults.length; i++)
+		{
+			System.out.println(publisherInfoResults[i]);
+		}		
 	}
 
 }
