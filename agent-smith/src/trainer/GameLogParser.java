@@ -59,6 +59,7 @@ public class GameLogParser extends Parser
 		myGameLogDataStruct = GameLogDataStruct.getInstance();
 		myGameLogDataStruct.addNewGameReport(simulationId);
 		myGameLogDataStruct.getGamesReports().get(simulationId).createQueryReport();
+		myGameLogDataStruct.getGamesReports().get(simulationId).createSalesReport();
 		
 		int agent;
 		participantNames = new String[participants.length];
@@ -78,7 +79,6 @@ public class GameLogParser extends Parser
 
 	private void QRparse(QueryReport qr, int sender, int receiver)
 	{
-		//System.out.println(day + ": " + participantNames[sender] + "->" + participantNames[receiver] + "," + "QueryReport");
 		DecimalFormat twoPlaces = new DecimalFormat("0.00");
 	
 		for (int i = 0; i < qr.size(); i++)
@@ -90,14 +90,12 @@ public class GameLogParser extends Parser
 
 	private void SRparse(SalesReport sr, int sender, int receiver)
 	{
-//		outLog.println(day + ": " + participantNames[sender] + "->" + participantNames[receiver] + "   SalesReport:");
 		DecimalFormat twoPlaces = new DecimalFormat("0.00");
-//		if (sr.size() != 0)
-//			outLog.println("\t \t  items \t revenue");
+
 		for (int i = 0; i < sr.size(); i++)
 		{
 			Query qentry = sr.getQuery(i);
-//			outLog.println(QueryToString(qentry) + "\t \t" + sr.getConversions(qentry) + "\t\t" + twoPlaces.format(sr.getRevenue(qentry)));
+			myGameLogDataStruct.getGamesReports().get(simulationId).getSalesReport().addParticipantSalesReport(participantNames[receiver], QueryToEnum(qentry), day, sr.getConversions(qentry)+"", twoPlaces.format(sr.getRevenue(qentry)));
 		}
 	}
 

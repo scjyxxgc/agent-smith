@@ -43,6 +43,7 @@ public class GameLogDataStruct
 	{
 		int gameId;
 		QueryReportLog queryReport;
+		SalesReportLog salesReport;
 		
 		public GameReports(int gameId)
 		{
@@ -57,6 +58,16 @@ public class GameLogDataStruct
 		public QueryReportLog getQueryReport()
 		{
 			return queryReport;
+		}
+		
+		public void createSalesReport()
+		{
+			salesReport = new SalesReportLog();
+		}
+
+		public SalesReportLog getSalesReport()
+		{
+			return salesReport;
 		}
 		
 		/**
