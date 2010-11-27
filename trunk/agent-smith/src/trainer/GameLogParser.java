@@ -60,6 +60,7 @@ public class GameLogParser extends Parser
 		myGameLogDataStruct.addNewGameReport(simulationId);
 		myGameLogDataStruct.getGamesReports().get(simulationId).createQueryReport();
 		myGameLogDataStruct.getGamesReports().get(simulationId).createSalesReport();
+		myGameLogDataStruct.getGamesReports().get(simulationId).createBidBundleReport();
 		
 		int agent;
 		participantNames = new String[participants.length];
@@ -101,15 +102,12 @@ public class GameLogParser extends Parser
 
 	private void BBparse(BidBundle bb, int sender, int receiver)
 	{
-//		outLog.println(day + ": " + participantNames[sender] + "->" + participantNames[receiver] + "   BidBundle:");
 		DecimalFormat twoPlaces = new DecimalFormat("0.00");
-//		if (bb.size() != 0)
-//			outLog.println("\t \t \t  ad \t     bid \t   limit \t Total Limit: " + twoPlaces.format(bb.getCampaignDailySpendLimit()));
+
 		for (int i = 0; i < bb.size(); i++)
 		{
 			Query qentry = bb.getQuery(i);
-//			outLog.println(QueryToString(qentry) + "\t \t" + AdToString(bb.getAd(qentry)) + "\t\t" + twoPlaces.format(bb.getBid(qentry)) + "\t\t"
-//					+ twoPlaces.format(bb.getDailyLimit(qentry)));
+			myGameLogDataStruct.getGamesReports().get(simulationId).getBidBundleReport().addParticipantBidBundleReport(participantNames[sender], QueryToEnum(qentry), day, AdToString(bb.getAd(qentry)), twoPlaces.format(bb.getBid(qentry)), twoPlaces.format(bb.getDailyLimit(qentry)));
 		}
 	}
 
