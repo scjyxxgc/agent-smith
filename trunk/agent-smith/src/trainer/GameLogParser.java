@@ -23,6 +23,7 @@ import se.sics.tasim.props.SimulationStatus;
 import se.sics.tasim.logtool.ParticipantInfo;
 import se.sics.tasim.logtool.LogReader;
 import se.sics.isl.transport.Transportable;
+import trainer.Constants.LogProduct;
 import trainer.Constants.LogQueryType;
 
 /**
@@ -61,6 +62,7 @@ public class GameLogParser extends Parser
 		myGameLogDataStruct.getGamesReports().get(simulationId).createQueryReport();
 		myGameLogDataStruct.getGamesReports().get(simulationId).createSalesReport();
 		myGameLogDataStruct.getGamesReports().get(simulationId).createBidBundleReport();
+		myGameLogDataStruct.getGamesReports().get(simulationId).createRetailCatalogReport();
 		
 		int agent;
 		participantNames = new String[participants.length];
@@ -113,13 +115,11 @@ public class GameLogParser extends Parser
 
 	private void RCparse(RetailCatalog rc, int sender, int receiver)
 	{
-//		outLog.println(day + ": " + participantNames[sender] + "->" + participantNames[receiver] + "   RetailCatalog:");
 		DecimalFormat twoPlaces = new DecimalFormat("0.00");
-		if (rc.size() != 0)
-//			outLog.println("\t product \tsales profit \t");
+
 		for (Product p : rc.keys())
 		{
-//			outLog.println("\t " + ProductToString(p) + "\t \t" + twoPlaces.format(rc.getSalesProfit(p)));
+			myGameLogDataStruct.getGamesReports().get(simulationId).getRetailCatalogReport().addParticipantRetailCatalogReport(participantNames[receiver], ProductToEnum(p), day, twoPlaces.format(rc.getSalesProfit(p)));
 		}
 	}
 
@@ -268,6 +268,21 @@ public class GameLogParser extends Parser
 			return "(" + firstLetter(p.getManufacturer()) + "," + firstLetter(p.getComponent()) + ")";
 	}
 
+	private LogProduct ProductToEnum(Product p)
+	{
+		if (p == null)
+			return LogProduct.Null;
+		
+		LogProduct[] theProducts = LogProduct.values();
+		for (int i = 0; i < theProducts.length; i++)
+		{
+			if((firstLetter(p.getManufacturer()) + "_" + firstLetter(p.getComponent())).equalsIgnoreCase(theProducts[i].toString()))
+				return theProducts[i];
+		}
+		
+		return null;
+	}
+	
 	private String AdToString(Ad ad)
 	{
 		if (ad == null)

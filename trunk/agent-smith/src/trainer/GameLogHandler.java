@@ -2,13 +2,16 @@ package trainer;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.logging.LoggingPermission;
 
 import se.sics.isl.util.IllegalConfigurationException;
 import se.sics.tasim.logtool.LogHandler;
 import se.sics.tasim.logtool.LogReader;
 import trainer.Constants.LogBidBundleReportParams;
+import trainer.Constants.LogProduct;
 import trainer.Constants.LogQueryReportParams;
 import trainer.Constants.LogQueryType;
+import trainer.Constants.LogRetailCatalogReportParams;
 import trainer.Constants.LogSalesReportParams;
 
 public class GameLogHandler extends LogHandler
@@ -60,6 +63,16 @@ public class GameLogHandler extends LogHandler
 		for (int i = 0; i < bidResults.length; i++)
 		{
 			System.out.println(bidResults[i]);
+		}
+		
+		System.out.println("*******************************************************************");
+		System.out.println("All particiants Retail Catalog reports " + GameLogDataStruct.getInstance().getGamesReports().get(218).getRetailCatalogReport().getAllParticipantsRetailCatalogReports().keySet().toString());
+		System.out.println("All of myAgent Retail Catalog reports " + GameLogDataStruct.getInstance().getGamesReports().get(218).getRetailCatalogReport().getSpecificParticipantAllRetailCatalogReport("myAgent").keySet().toString());
+		System.out.println("Participant Retail Catalog Report my myAgent, query p_d:");
+		String[] salesProfitResults = GameLogDataStruct.getInstance().getGamesReports().get(218).getRetailCatalogReport().getSpecificParticipantAllRetailCatalogReport("myAgent").get(LogProduct.p_d).get(LogRetailCatalogReportParams.salesProfit);
+		for (int i = 0; i < salesProfitResults.length; i++)
+		{
+			System.out.println(salesProfitResults[i]);
 		}
 	}
 

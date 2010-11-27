@@ -45,6 +45,7 @@ public class GameLogDataStruct
 		QueryReportLog queryReport;
 		SalesReportLog salesReport;
 		BidBundleReportLog bidBundleReport;
+		RetailCatalogReportLog retailCatalogReport;
 		
 		public GameReports(int gameId)
 		{
@@ -79,6 +80,16 @@ public class GameLogDataStruct
 		public BidBundleReportLog getBidBundleReport()
 		{
 			return bidBundleReport;
+		}
+		
+		public void createRetailCatalogReport()
+		{
+			retailCatalogReport = new RetailCatalogReportLog();
+		}
+
+		public RetailCatalogReportLog getRetailCatalogReport()
+		{
+			return retailCatalogReport;
 		}
 		
 		/**
