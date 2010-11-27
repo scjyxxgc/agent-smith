@@ -63,6 +63,8 @@ public class GameLogParser extends Parser
 		myGameLogDataStruct.getGamesReports().get(simulationId).createSalesReport();
 		myGameLogDataStruct.getGamesReports().get(simulationId).createBidBundleReport();
 		myGameLogDataStruct.getGamesReports().get(simulationId).createRetailCatalogReport();
+		myGameLogDataStruct.getGamesReports().get(simulationId).createSlotInfoReport();
+		myGameLogDataStruct.getGamesReports().get(simulationId).createUserClickModelReportReport();
 		
 		int agent;
 		participantNames = new String[participants.length];
@@ -126,31 +128,36 @@ public class GameLogParser extends Parser
 	private void SIparse(SlotInfo si, int sender, int receiver)
 	{
 		DecimalFormat twoPlaces = new DecimalFormat("0.00");
-//		outLog.println(day + ": " + participantNames[sender] + "->" + participantNames[receiver] + "   SlotInfo: p-slots " + si.getPromotedSlots() + ", r-slots: "
-//				+ si.getPromotedSlots() + ", p-bonus: " + twoPlaces.format(si.getPromotedSlotBonus()));
+		myGameLogDataStruct.getGamesReports().get(simulationId).getSlotInfoReport().addParticipantSlotInfoReport(participantNames[receiver], day, si.getPromotedSlots()+"", si.getRegularSlots()+"", twoPlaces.format(si.getPromotedSlotBonus()));
 	}
 
 	private void UCMparse(UserClickModel ucm, int sender, int receiver)
 	{
 		DecimalFormat twoPlaces = new DecimalFormat("0.00");
 //		outLog.println(day + ": " + participantNames[sender] + "->" + participantNames[receiver] + "   UserClickModel: (AdvertiserEffect)");
-		String advs = "\t ";
+//		String advs = "\t ";
 		for (int a = 0; a < ucm.advertiserCount(); a++)
 		{
-			advs += ucm.advertiser(a) + "    \t";
+			for (int i = 0; i < ucm.queryCount(); i++)
+			{	
+				myGameLogDataStruct.getGamesReports().get(simulationId).getUserClickModelReportReport().addParticipantUserClickModelAdvertiserEffectReport(ucm.advertiser(a), QueryToEnum(ucm.query(i)), day, twoPlaces.format(ucm.getAdvertiserEffect(i, a)));				
+				
+//				advs += ucm.advertiser(a) + "    \t";
+			}
 		}
-		advs += "Continuation Probability";
+//		advs += "Continuation Probability";
 //		outLog.println(advs);
 
 		for (int i = 0; i < ucm.queryCount(); i++)
 		{
-			String qstr = " ";
+//			String qstr = " ";
 			for (int a = 0; a < ucm.advertiserCount(); a++)
 			{
-				qstr += twoPlaces.format(ucm.getAdvertiserEffect(i, a)) + "        ";
+//				qstr += twoPlaces.format(ucm.getAdvertiserEffect(i, a)) + "        ";
 			}
-			qstr += twoPlaces.format(ucm.getContinuationProbability(i));
-
+//			qstr += twoPlaces.format(ucm.getContinuationProbability(i));
+		
+			myGameLogDataStruct.getGamesReports().get(simulationId).getUserClickModelReportReport().addUserClickModelContinuationProbabilityReport(QueryToEnum(ucm.query(i)), day, ucm.getContinuationProbability(i)+"");
 //			outLog.println(QueryToString(ucm.query(i)) + qstr);
 		}
 	}
