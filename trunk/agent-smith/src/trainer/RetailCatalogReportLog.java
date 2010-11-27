@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import trainer.Constants.LogProduct;
-import trainer.Constants.LogQueryType;
 import trainer.Constants.LogRetailCatalogReportParams;
 
 public class RetailCatalogReportLog
@@ -36,9 +35,9 @@ public class RetailCatalogReportLog
 	/**
 	 * Returns full map, which is built as follows:
 	 * 
-	 * All Participant --> Query Type --> Retail Catalog Parameter --> Results in String array arranged by day
+	 * All Participant --> Product --> Retail Catalog Parameter --> Results in String array arranged by day
 	 * 
-	 * Query Type = n_n, n_d etc', from the enum at Constant.LogQueryType
+	 * Product = n_n, n_d etc', from the enum at Constant.LogProduct
 	 * Retail Catalog Report Parameter = salesProfit, from the enum at LogRetailCatalogReportParams
 	 * 
 	 * @return allParticipantsRetailCatalogReports
@@ -51,9 +50,9 @@ public class RetailCatalogReportLog
 	/**
 	 * Returns medium map, which is built as follows:
 	 * 
-	 * Participant from input --> Query Type --> Retail Catalog Parameter --> Results in String array arranged by day
+	 * Participant from input --> Product --> Retail Catalog Parameter --> Results in String array arranged by day
 	 * 
-	 * Query Type = n_n, n_d etc', from the enum at Constant.LogQueryType
+	 * Product = n_n, n_d etc', from the enum at Constant.LogProduct
 	 * Retail Catalog Report Parameter = salesProfit, from the enum at LogRetailCatalogReportParams
 	 * 
 	 * @return allParticipantsRetailCatalogReports.get(Participant)
@@ -66,15 +65,15 @@ public class RetailCatalogReportLog
 	/**
 	 * Returns smallest map, which is built as follows:
 	 * 
-	 * Participant from input --> Query Type from input --> Retail Catalog Parameter --> Results in String array arranged by day
+	 * Participant from input --> Product from input --> Retail Catalog Parameter --> Results in String array arranged by day
 	 * 
-	 * Query Type = n_n, n_d etc', from the enum at Constant.LogQueryType
+	 * Product = n_n, n_d etc', from the enum at Constant.LogProduct
 	 * Retail Catalog Report Parameter = salesProfit, from the enum at LogRetailCatalogReportParams
 	 * 
 	 * @return allParticipantsRetailCatalogReports.get(Participant).get(queryType)
 	 */
-	public Map<LogRetailCatalogReportParams, String[]> getSpecificParticipantSpecificRetailCatalogReport(String Participant, LogQueryType queryType)
+	public Map<LogRetailCatalogReportParams, String[]> getSpecificParticipantSpecificRetailCatalogReport(String Participant, LogProduct product)
 	{
-		return allParticipantsRetailCatalogReports.get(Participant).get(queryType);
+		return allParticipantsRetailCatalogReports.get(Participant).get(product);
 	}	
 }
