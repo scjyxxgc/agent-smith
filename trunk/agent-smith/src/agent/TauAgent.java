@@ -406,5 +406,14 @@ public class TauAgent extends Agent implements IAgent {
     	salesReports.clear();
         queryReports.clear();
         querySet.clear();
+        
+        String[] arguments = new String[] {"-handler", "trainer.GameLogHandler", "-file", "..\\aa-server-10.1.0.1\\sim" + getStartInfo().getSimulationID() + ".slg"};
+        try
+		{
+			se.sics.tasim.logtool.Main.main(arguments);
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+		}
     }
 }
