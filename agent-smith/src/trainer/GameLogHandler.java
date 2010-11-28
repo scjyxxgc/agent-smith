@@ -31,13 +31,13 @@ public class GameLogHandler extends LogHandler
 	 *            the log reader for the log file.
 	 */
 	protected void start(LogReader reader) throws IllegalConfigurationException, IOException, ParseException
-	{
-		int gameId = 218; //TEMP - till i figure out how to integrate this into the game itself
-		
+	{ 
 		GameLogParser parser = new GameLogParser(reader);
 		parser.start();
 		parser.stop();
 
+		int gameId = reader.getSimulationID();
+		
 		System.out.println("\n*************************  General  ***************************");
 		System.out.println("Is game report Empty: " + GameLogDataStruct.getInstance().getGamesReports().isEmpty());
 		System.out.println("Key Set: " + GameLogDataStruct.getInstance().getGamesReports().keySet().toString());
