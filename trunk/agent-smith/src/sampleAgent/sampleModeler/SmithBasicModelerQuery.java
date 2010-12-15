@@ -19,22 +19,36 @@ public class SmithBasicModelerQuery extends AgentComponentQuery {
     protected static double IMPR_INIT = 100.0;
     
     /* sales report */
-    protected	int		[]	conversions;
-    protected	double 	[]	revenue;
-    public		int		[]	estConversions;
-    public		double 	[]	estRevenue;
+    protected	Integer	[]	conversions;
+    protected	Double 	[]	revenue;
+    protected	Double	[]	estConversions;
+    protected	Double 	[]	estRevenue;
+    
+    protected	Integer	[]	clicks;
+    protected	Double	[]	estClicks;
+    
+    protected	Double		cumulativeClicksProbability;
+    protected	Double		cumulativeConversionsProbability;
+    protected	Double		estClicksProbability;
+    protected	Double		estConversionsProbability;
     
 	public SmithBasicModelerQuery(Query q) {
 		super(q);
 	
-		estCpc = 			new Double[TAU_SIMDAYS+3];
-		estImpressions =	new Double[TAU_SIMDAYS+3];
-		cpc = 				new Double[TAU_SIMDAYS+3];
-		impressions = 		new int[TAU_SIMDAYS+3];
-		conversions = 		new int[TAU_SIMDAYS+3];
-		revenue = 			new double[TAU_SIMDAYS+3];
-		estConversions = 	new int[TAU_SIMDAYS+3];
-		estRevenue = 		new double[TAU_SIMDAYS+3];
+		estCpc 			= 	new Double[TAU_SIMDAYS+3];
+		estImpressions	=	new Double[TAU_SIMDAYS+3];
+		cpc 			= 	new Double[TAU_SIMDAYS+3];
+		impressions		=	new int[TAU_SIMDAYS+3];
+		conversions		=	new Integer[TAU_SIMDAYS+3];
+		revenue			=	new Double[TAU_SIMDAYS+3];
+		estConversions	=	new Double[TAU_SIMDAYS+3];
+		estRevenue		=	new Double[TAU_SIMDAYS+3];
+		clicks			=	new Integer[TAU_SIMDAYS+3];
+		estClicks		=	new Double[TAU_SIMDAYS+3];
+		cumulativeClicksProbability			= 0.0;
+		cumulativeConversionsProbability	= 0.0;
+		estClicksProbability				= 0.0;
+		estConversionsProbability			= 0.0;
 		
 		nextDay(0);
 	}
@@ -50,12 +64,12 @@ public class SmithBasicModelerQuery extends AgentComponentQuery {
 		estImpressions[day]=IMPR_INIT;
 	}
 	
-	public int[] getConversions(){
-		return this.conversions;
+	public Integer getConversions(int ind){
+		return this.conversions[ind];
 	}
 	
-	public double[] getRevenue(){
-		return this.revenue;
+	public Double getRevenue(int ind){
+		return this.revenue[ind];
 	}
 	
 	public void setConversions(int ind, int elem){
@@ -66,19 +80,67 @@ public class SmithBasicModelerQuery extends AgentComponentQuery {
 		this.revenue[ind] = elem;
 	}
 	
-	public int[] getEstConversions(){
-		return this.estConversions;
+	public Double getEstConversions(int ind){
+		return this.estConversions[ind];
 	}
 	
-	public double[] getEstRevenue(){
-		return this.estRevenue;
+	public Double getEstRevenue(int ind){
+		return this.estRevenue[ind];
 	}
 	
-	public void setEstConversions(int ind, int elem){
+	public void setEstConversions(int ind, double elem){
 		this.estConversions[ind] = elem;
 	}
 	
 	public void setEstRevenue(int ind, double elem){
 		this.estRevenue[ind] = elem;
+	}
+	
+	public Integer getClicks(int ind){
+		return this.clicks[ind];
+	}
+	
+	public Double getEstClicks(int ind){
+		return this.estClicks[ind];
+	}
+	
+	public void setClicks(int ind, int elem){
+		this.clicks[ind] = elem;
+	}
+	
+	public void setEstClicks(int ind, double elem){
+		this.estClicks[ind] = elem;
+	}
+	
+	public void addToCumulativeClicksProbability(double ratio){
+		this.cumulativeClicksProbability += ratio;
+	}
+	
+	public void addToCumulativeConversionsProbability(double ratio){
+		this.cumulativeConversionsProbability += ratio;
+	}
+	
+	public double getCumulativeClicksProbability(){
+		return this.cumulativeClicksProbability;
+	}
+	
+	public double getCumulativeConversionsProbability(){
+		return this.cumulativeConversionsProbability;
+	}
+	
+	public void setEstClicksProbability(double value){
+		this.estClicksProbability = value;
+	}
+	
+	public void setEstConversionsProbability(double value){
+		this.estConversionsProbability = value;
+	}
+	
+	public double getEstClicksProbability(){
+		return this.estClicksProbability;
+	}
+	
+	public double getEstConversionsProbability(){
+		return this.estConversionsProbability;
 	}
 }

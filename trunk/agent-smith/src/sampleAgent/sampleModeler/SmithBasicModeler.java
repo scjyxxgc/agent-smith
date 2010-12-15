@@ -50,12 +50,15 @@ public class SmithBasicModeler extends Modeler {
         		query.estCpc[yday+2] = query.estCpc[yday+1];
         	
         	query.estImpressions[yday+2] = decay*query.impressions[yday] + (1-decay)*query.estImpressions[yday+1];
+        	
+        	query.setClicks(yday, queryReport.getClicks(query.getQuery()));
        	}
 	}
 
 	public void handleSalesReport(SalesReport salesReport, int yday) {
 		int conv = 0;
 		double rev = 0.0;
+		double ratio = 0.0;
 		
 		for(SmithBasicModelerQuery query : querySpace) { 
         	conv = salesReport.getConversions(query.getQuery());
@@ -63,6 +66,19 @@ public class SmithBasicModeler extends Modeler {
         	
         	query.setConversions(yday, conv);
         	query.setRevenue(yday, rev);
+        	
+        	/* update cumulative clicks and conversions probability */
+        	ratio = query.getClicks(yday) / query.impressions[yday];
+        	query.addToCumulativeClicksProbability(ratio);
+        	ratio = query.getConversions(yday) / query.getClicks(yday);
+        	query.addToCumulativeConversionsProbability(ratio);
+        	
+        	if (yday > 0)
+        	{
+        		/* update estimated clicks and conversions probability */
+        		query.setEstClicksProbability(query.getCumulativeClicksProbability() / yday);
+        		query.setEstConversionsProbability(query.getCumulativeConversionsProbability() / yday);
+        	}
 		}
 	}
 	
