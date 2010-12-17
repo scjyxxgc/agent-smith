@@ -58,7 +58,8 @@ public class SmithBasicModeler extends Modeler {
 	public void handleSalesReport(SalesReport salesReport, int yday) {
 		int conv = 0;
 		double rev = 0.0;
-		double ratio = 0.0;
+		double ratio1 = 0.0;
+		double ratio2 = 0.0;
 		
 		for(SmithBasicModelerQuery query : querySpace) { 
         	conv = salesReport.getConversions(query.getQuery());
@@ -68,10 +69,18 @@ public class SmithBasicModeler extends Modeler {
         	query.setRevenue(yday, rev);
         	
         	/* update cumulative clicks and conversions probability */
-        	ratio = query.getClicks(yday) / query.impressions[yday];
-        	query.addToCumulativeClicksProbability(ratio);
-        	ratio = query.getConversions(yday) / query.getClicks(yday);
-        	query.addToCumulativeConversionsProbability(ratio);
+        	if (query.getClicks(yday) != null)
+        	{	
+        		ratio1 = query.getClicks(yday) / query.impressions[yday];
+        		ratio2 = query.getConversions(yday) / query.getClicks(yday);
+        	}
+        	else
+        	{
+        		ratio1=0.0;
+        		ratio2=0.0;
+        	}
+        	query.addToCumulativeClicksProbability(ratio1);
+        	query.addToCumulativeConversionsProbability(ratio2);
         	
         	if (yday > 0)
         	{
