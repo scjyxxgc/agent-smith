@@ -1,0 +1,15 @@
+#!/bin/bash
+#
+# Usage
+# From the agent directory:
+#   sh ./run-agent
+#
+
+TAC_AGENT_HOME=`pwd`
+LIB=${TAC_AGENT_HOME}/additionalJars
+CLASSPATH=.:bin
+for i in $( ls ${LIB}/*.jar ); do
+  CLASSPATH=${CLASSPATH}:$i
+done
+
+java -cp $CLASSPATH edu.umich.eecs.tac.aa.agentware.Main -config config/agentSmithAw.conf
