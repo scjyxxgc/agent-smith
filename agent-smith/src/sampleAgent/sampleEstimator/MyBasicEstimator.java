@@ -1,5 +1,7 @@
 package sampleAgent.sampleEstimator;
 
+import static arch.AgentConstants.TAU_SIMDAYS;
+
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
@@ -20,8 +22,8 @@ public class MyBasicEstimator extends Estimator {
 	double decay;
     protected static double DECAY_DEFAULT = 0.1;
     //CHANGE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    double [] b1 = new double[61]; //for query.estConvRate
-    double [] b2 = new double[61]; //for query.estClickRate
+    double [] b1 = new double[TAU_SIMDAYS+3]; //for query.estConvRate
+    double [] b2 = new double[TAU_SIMDAYS+3]; //for query.estClickRate
    
    	protected Queue<MyBasicEstimatorQuery> querySpace;
 	/**public class BasicEstimatorQuery extends AgentComponentQuery {
