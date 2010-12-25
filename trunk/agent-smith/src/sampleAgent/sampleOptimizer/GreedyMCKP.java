@@ -2,82 +2,99 @@ package sampleAgent.sampleOptimizer;
 
 import java.util.*;
 
+import edu.umich.eecs.tac.props.Query;
+
 public class GreedyMCKP
 {
-	protected List<Item> itemList = new ArrayList<Item>();
-	protected List<Item> backupItemList = new ArrayList<Item>();
-	protected List<Item> itemListDiffSeries = new ArrayList<Item>();
-	protected double maxWeight = 0;
+	protected Map<Query, List<Item>> allQueriesItemLists = new HashMap<Query, List<Item>>();
+	protected Map<Query, Integer> lastIncrementalIndexForAllQueries = new HashMap<Query, Integer>();
+	protected Map<Query, Integer> otimalBidIndexPerQuery = new HashMap<Query, Integer>();
+	protected List<Item> allItemsListDiffSeries = new ArrayList<Item>();
+	protected double capacity = 0;
 	protected double solutionWeight = 0;
-	protected int lastIncremantalItemIndex = 0;
 	protected boolean calculated = false;
 
-	public GreedyMCKP()
+	public GreedyMCKP(int theCapacity, Set<Query> querySet)
 	{
-	}
-
-	public GreedyMCKP(int theMaxWeight)
-	{
-		setMaxWeight(theMaxWeight);
-	}
-
-	public GreedyMCKP(List<Item> theItemList)
-	{
-		setItemList(theItemList);
-	}
-
-	public GreedyMCKP(List<Item> theItemList, int theMaxWeight)
-	{
-		setItemList(theItemList);
-		setMaxWeight(theMaxWeight);
+		setCapacity(theCapacity);	
+		for (Query query : querySet)
+		{
+			allQueriesItemLists.put(query, new ArrayList<Item>());
+			lastIncrementalIndexForAllQueries.put(query, 0);
+			otimalBidIndexPerQuery.put(query, 0);
+		}
 	}
 
 	// calculate the solution of MCKP with greedy method and return optimal bid
-	public double calcSolution()
+	public Map<Query, Integer> calcSolution()
 	{
-		int n = itemList.size();
-		backupItemList.addAll(itemList);
-
 		setInitialStateForCalculation();
-		if (n > 0 && maxWeight > 0)
+		if (capacity > 0)
 		{
 			//System.out.println("Step 1");
-			sortItemsByWeight();
-			//printList(itemList);
+			sortAllListsItemsByWeight();
+			//printMap(allQueriesItemLists);
 
 			//System.out.println("Step 2");
-			removeDominatedItems();
-			removeLPDominatedItems();
-			//printList(itemList);
+			removeDominatedItemsFromAllLists();
+			removeLPDominatedItemsFromAllLists();
+			renumberItemsFromAllLists();
+			//printMap(allQueriesItemLists);
 			
 			//System.out.println("Step 3");
 			createIncrementalItemsDiffSeries();
-			//printList(itemListDiffSeries);
+			//printList(allItemsListDiffSeries);
 
 			//System.out.println("Calculating Regular KP");
 			calcRegularKP();
 			//printList(itemListDiffSeries);
 			
+			setOptimalBidPerQuery();
+			
 			calculated = true;
 		} // if()
 		
-		System.out.println("lastIncremantalItemIndex= " + lastIncremantalItemIndex);
 		System.out.println("solutionWeight= " + solutionWeight);
-		
-		return backupItemList.get(lastIncremantalItemIndex).getBid();
+	
+		return otimalBidIndexPerQuery;	
 	}
 
 	/**
 	 * 
 	 */
+	protected void setOptimalBidPerQuery()
+	{ 
+		for(Map.Entry<Query, Integer> queueList : lastIncrementalIndexForAllQueries.entrySet())
+		{	
+			otimalBidIndexPerQuery.put(queueList.getKey(), allQueriesItemLists.get(queueList.getKey()).get(queueList.getValue()).getOriginalIndex());
+			//System.out.println("Last index for query " + queueList.getKey() + " is " + queueList.getValue() + ", Best bid is " + otimalBidIndexPerQuery.get(queueList.getKey()));
+		}
+	}
+	
+	/**
+	 * 
+	 */
 	protected void calcRegularKP()
-	{
-		for (int i = 0; i < itemListDiffSeries.size(); i++)
+	{ 
+		double residualCapacity = capacity;
+		for(Map.Entry<Query, List<Item>> queueList : allQueriesItemLists.entrySet())
 		{
-			while ((solutionWeight + itemListDiffSeries.get(i).getWeight()) <= maxWeight)
+			residualCapacity = residualCapacity - queueList.getValue().get(0).getWeight();
+			solutionWeight = solutionWeight + queueList.getValue().get(0).getWeight();
+		}
+		
+		for (int i = 0; i < allItemsListDiffSeries.size(); i++)
+		{
+			if((allItemsListDiffSeries.get(i).getWeight()) <= residualCapacity)
 			{
-				solutionWeight += itemListDiffSeries.get(i).getWeight();
-				lastIncremantalItemIndex = i;
+				solutionWeight = solutionWeight +  allItemsListDiffSeries.get(i).getWeight();
+				residualCapacity = residualCapacity - allItemsListDiffSeries.get(i).getWeight();
+				//System.out.println("Taking " + allItemsListDiffSeries.get(i).getQuery() + ", " + allItemsListDiffSeries.get(i).getValue() + ", " + allItemsListDiffSeries.get(i).getWeight() + ", Residual=" + residualCapacity);
+				if(lastIncrementalIndexForAllQueries.get(allItemsListDiffSeries.get(i).getQuery()) < allItemsListDiffSeries.get(i).getIndex())
+				{
+					lastIncrementalIndexForAllQueries.put(allItemsListDiffSeries.get(i).getQuery(), allItemsListDiffSeries.get(i).getIndex());
+					//System.out.println("Setting last index for query " + allItemsListDiffSeries.get(i).getQuery() + "To " + lastIncrementalIndexForAllQueries.get(allItemsListDiffSeries.get(i).getQuery()));
+				}
 			}
 		}
 	}
@@ -87,19 +104,15 @@ public class GreedyMCKP
 	 */
 	protected void createIncrementalItemsDiffSeries()
 	{
-		for (int i = 0; i < itemList.size(); i++)
+		for(Map.Entry<Query, List<Item>> queueList : allQueriesItemLists.entrySet())
 		{
-			if(i==0)
+			for (int i = 1; i < queueList.getValue().size(); i++)
 			{
-				itemListDiffSeries.add(new Item(itemList.get(i).getWeight(), itemList.get(i).getValue()));
-			}
-			else
-			{
-				itemListDiffSeries.add(new Item(itemList.get(i).getWeight()-itemList.get(i-1).getWeight(), itemList.get(i).getValue()-itemList.get(i-1).getValue()));
+				allItemsListDiffSeries.add(new Item(queueList.getValue().get(i).getWeight()-queueList.getValue().get(i-1).getWeight(), queueList.getValue().get(i).getValue()-queueList.getValue().get(i-1).getValue(), queueList.getValue().get(i).getQuery(), queueList.getValue().get(i).getIndex()));
 			}
 		}
 		
-		Collections.sort(itemListDiffSeries, new Comparator<Item>() {
+		Collections.sort(allItemsListDiffSeries, new Comparator<Item>() {
 			public int compare(Item e1, Item e2)
 			{
 				if (e1.getValue()/e1.getWeight() < e2.getValue()/e2.getWeight())
@@ -115,44 +128,64 @@ public class GreedyMCKP
 	/**
 	 * 
 	 */
-	protected void removeDominatedItems()
+	protected void removeDominatedItemsFromAllLists()
 	{
-		List<Item> itemsToRemove = new ArrayList<Item>();
-		for (int i = 0; i < itemList.size(); i++)
+		for(Map.Entry<Query, List<Item>> queueList : allQueriesItemLists.entrySet())
 		{
-			for (int j = i; j < itemList.size(); j++)
+			List<Item> itemsToRemove = new ArrayList<Item>();
+			for (int i = 0; i < queueList.getValue().size(); i++)
 			{
-				if (itemList.get(i).getValue() > itemList.get(j).getValue())
+				for (int j = i; j < queueList.getValue().size(); j++)
 				{
-					itemsToRemove.add(itemList.get(j));
-				} else if (itemList.get(i).getWeight() == itemList.get(j).getWeight() && itemList.get(i).getValue() < itemList.get(j).getValue())
-				{
-					itemsToRemove.add(itemList.get(i));
+					if (queueList.getValue().get(i).getValue() > queueList.getValue().get(j).getValue())
+					{
+						itemsToRemove.add(queueList.getValue().get(j));
+					} else if (queueList.getValue().get(i).getWeight() == queueList.getValue().get(j).getWeight() && queueList.getValue().get(i).getValue() < queueList.getValue().get(j).getValue())
+					{
+						itemsToRemove.add(queueList.getValue().get(i));
+					}
 				}
 			}
+			queueList.getValue().removeAll(itemsToRemove);
+			itemsToRemove.clear();
 		}
-		itemList.removeAll(itemsToRemove);
-		itemsToRemove.clear();
+	}
+	
+	/**
+	 * 
+	 */
+	protected void renumberItemsFromAllLists()
+	{
+		for(Map.Entry<Query, List<Item>> queueList : allQueriesItemLists.entrySet())
+		{	
+			for (int i = 0; i < queueList.getValue().size(); i++)
+			{
+				queueList.getValue().get(i).setIndex(i);
+			}
+		}
 	}
 
 	/**
 	 * 
 	 */
-	protected void removeLPDominatedItems()
+	protected void removeLPDominatedItemsFromAllLists()
 	{
-		List<Item> itemsToRemove = new ArrayList<Item>();
-		for (int i = 1; i < itemList.size() - 1; i++)
+		for(Map.Entry<Query, List<Item>> queueList : allQueriesItemLists.entrySet())
 		{
-			if (itemList.get(i - 1).getWeight() < itemList.get(i).getWeight() && itemList.get(i).getWeight() < itemList.get(i + 1).getWeight()
-					&& itemList.get(i - 1).getValue() < itemList.get(i).getValue() && itemList.get(i).getValue() < itemList.get(i + 1).getValue()
-					&& (((itemList.get(i+1).getValue() - itemList.get(i).getValue()) / (itemList.get(i+1).getWeight() - itemList.get(i).getWeight())) >= 
-						((itemList.get(i).getValue() - itemList.get(i - 1).getValue()) / (itemList.get(i).getWeight() - itemList.get(i - 1).getWeight()))))
+			List<Item> itemsToRemove = new ArrayList<Item>();
+			for (int i = 1; i < queueList.getValue().size() - 1; i++)
 			{
-				itemsToRemove.add(itemList.get(i));
+				if (queueList.getValue().get(i - 1).getWeight() < queueList.getValue().get(i).getWeight() && queueList.getValue().get(i).getWeight() < queueList.getValue().get(i + 1).getWeight()
+						&& queueList.getValue().get(i - 1).getValue() < queueList.getValue().get(i).getValue() && queueList.getValue().get(i).getValue() < queueList.getValue().get(i + 1).getValue()
+						&& (((queueList.getValue().get(i+1).getValue() - queueList.getValue().get(i).getValue()) / (queueList.getValue().get(i+1).getWeight() - queueList.getValue().get(i).getWeight())) >= 
+							((queueList.getValue().get(i).getValue() - queueList.getValue().get(i - 1).getValue()) / (queueList.getValue().get(i).getWeight() - queueList.getValue().get(i - 1).getWeight()))))
+				{
+					itemsToRemove.add(queueList.getValue().get(i));
+				}
 			}
+			queueList.getValue().removeAll(itemsToRemove);
+			itemsToRemove.clear();
 		}
-		itemList.removeAll(itemsToRemove);
-		itemsToRemove.clear();
 	}
 
 	/**
@@ -162,7 +195,25 @@ public class GreedyMCKP
 	{
 		for (Item item : theItemList)
 		{
-			System.out.println(item.getBid() + "  " + item.getWeight() + "  " + item.getValue());
+			System.out.println(item.getQuery() + "  " + item.getValue() + "  " + item.getWeight() );
+		}
+		System.out.println();
+	}
+	
+	/**
+	 * 
+	 */
+	protected void printMap(Map<Query, List<Item>> theItemListMap)
+	{
+		for(Map.Entry<Query, List<Item>> queueList : theItemListMap.entrySet())
+		{
+			List<Item> theItemList = queueList.getValue();
+			System.out.print(queueList.getKey() + ": ");
+			for (Item item : theItemList)
+			{
+				System.out.print("(" + item.getValue() + "," + item.getWeight() + "), ");
+			}
+			System.out.println();
 		}
 		System.out.println();
 	}
@@ -170,56 +221,34 @@ public class GreedyMCKP
 	/**
 	 * 
 	 */
-	protected void sortItemsByWeight()
+	protected void sortAllListsItemsByWeight()
 	{
-		Collections.sort(itemList, new Comparator<Item>() {
-			public int compare(Item e1, Item e2)
-			{
-				if (e1.getWeight() > e2.getWeight())
-					return 1;
-				else if (e2.getWeight() > e1.getWeight())
-					return -1;
-				else
-					return 0;
-			}
-		});
+		for(Map.Entry<Query, List<Item>> queueList : allQueriesItemLists.entrySet())
+		{
+			Collections.sort(queueList.getValue(), new Comparator<Item>() {
+				public int compare(Item e1, Item e2)
+				{
+					if (e1.getWeight() > e2.getWeight())
+						return 1;
+					else if (e2.getWeight() > e1.getWeight())
+						return -1;
+					else
+						return 0;
+				}
+			});
+		}
 	}
 
 	// add an item to the item list
-	public void add(double theBid, double theWeight, double theValue)
+	public void add(Query theQuery, int index, double theBid, double theWeight, double theValue)
 	{
-		itemList.add(new Item(theBid, theWeight, theValue));
-		setInitialStateForCalculation();
-	}
-
-	// remove an item from the item list
-	public void remove(double theBid)
-	{
-		for (Iterator<Item> it = itemList.iterator(); it.hasNext();)
-		{
-			if (theBid == it.next().getBid())
-			{
-				it.remove();
-			}
-		}
-		setInitialStateForCalculation();
-	}
-
-	// remove all items from the item list
-	public void removeAllItems()
-	{
-		itemList.clear();
-		setInitialStateForCalculation();
+		//System.out.println("The value added: " + theValue);
+		allQueriesItemLists.get(theQuery).add(new Item(theBid, index, theWeight, theValue, theQuery));
 	}
 
 	public double getSolutionWeight()
 	{
 		return solutionWeight;
-	}
-	
-	public int getLastIncremantalItemIndex()
-	{
-		return lastIncremantalItemIndex;
 	}
 
 	public boolean isCalculated()
@@ -227,22 +256,14 @@ public class GreedyMCKP
 		return calculated;
 	}
 
-	public double getMaxWeight()
+	public double getCapacity()
 	{
-		return maxWeight;
+		return capacity;
 	}
 
-	public void setMaxWeight(int theMaxWeight)
+	public void setCapacity(int theCapacity)
 	{
-		maxWeight = Math.max(theMaxWeight, 0);
-	}
-
-	public void setItemList(List<Item> theItemList)
-	{
-		if (theItemList != null)
-		{
-			itemList = theItemList;
-		}
+		capacity = Math.max(theCapacity, 0);
 	}
 
 	// set the class in the state of starting the calculation:
@@ -250,7 +271,10 @@ public class GreedyMCKP
 	{
 		calculated = false;
 		solutionWeight = 0;
-		lastIncremantalItemIndex = 0;
+		for(Map.Entry<Query, Integer> queueList : lastIncrementalIndexForAllQueries.entrySet())
+		{
+			queueList.setValue(0);
+		}
 	}
 
 } // class
