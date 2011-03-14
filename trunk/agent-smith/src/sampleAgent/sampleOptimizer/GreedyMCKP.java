@@ -30,7 +30,7 @@ public class GreedyMCKP
 	{
 		setInitialStateForCalculation();
 		if (capacity > 0)
-		{
+		{			
 			//System.out.println("Step 1");
 			sortAllListsItemsByWeight();
 			//printMap(allQueriesItemLists);
@@ -47,7 +47,6 @@ public class GreedyMCKP
 
 			//System.out.println("Calculating Regular KP");
 			calcRegularKP();
-			//printList(itemListDiffSeries);
 			
 			setOptimalBidPerQuery();
 			
@@ -67,7 +66,7 @@ public class GreedyMCKP
 		for(Map.Entry<Query, Integer> queueList : lastIncrementalIndexForAllQueries.entrySet())
 		{	
 			otimalBidIndexPerQuery.put(queueList.getKey(), allQueriesItemLists.get(queueList.getKey()).get(queueList.getValue()).getOriginalIndex());
-			//System.out.println("Last index for query " + queueList.getKey() + " is " + queueList.getValue() + ", Best bid is " + otimalBidIndexPerQuery.get(queueList.getKey()));
+			System.out.println("HybridPenalizedGreedyMCKP: Last index for query " + queueList.getKey() + " is " + queueList.getValue() + ", Best bid is " + otimalBidIndexPerQuery.get(queueList.getKey()));		
 		}
 	}
 	
