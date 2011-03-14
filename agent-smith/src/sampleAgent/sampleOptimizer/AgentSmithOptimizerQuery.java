@@ -20,11 +20,16 @@ public class AgentSmithOptimizerQuery extends AgentComponentQuery
 	public int bestBidIndex;
 	public double[] bids;
 	public double dailyLimit;
+	public double equateRoiBid;
 
 	/* latest data reported for yesterday */
 	public double yesterdayRevenue;
 	public int yesterdayConversions;
 	public double yesterdayCost;
+	public int yesterdayClicks;
+	public double yesterdayPosition;
+	public int yesterdayImpressions;
+
 
 	/* latest estimates */
 	protected double[] estImpressions;
@@ -34,6 +39,7 @@ public class AgentSmithOptimizerQuery extends AgentComponentQuery
 	protected double[] estProfits;
 	
 	protected int NUMBER_OF_BIDS = 100;
+	protected float RESOULUTION_OF_BIDS = 0.1f;
 
 	public AgentSmithOptimizerQuery(Query q)
 	{
@@ -62,7 +68,7 @@ public class AgentSmithOptimizerQuery extends AgentComponentQuery
 		bids[0]=0;
 		for (int i = 1; i < bids.length; i++)
 		{
-			bids[i] = bids[i-1] + 0.1;
+			bids[i] = bids[i-1] + RESOULUTION_OF_BIDS;
 		}
 	}
 
@@ -72,6 +78,11 @@ public class AgentSmithOptimizerQuery extends AgentComponentQuery
 	public void setBestBidIndex(int bidIndex)
 	{
 		bestBidIndex = bidIndex;
+	}
+	
+	public void setEquateRoiBid(double theBid)
+	{
+		equateRoiBid = theBid;
 	}
 
 	public void setEstimates(int bidIndex, double impressions, double cpc, double conversions, double clicks, double profit)
@@ -112,7 +123,12 @@ public class AgentSmithOptimizerQuery extends AgentComponentQuery
 
 	protected void calculateDailyLimit(int theBestBidIndex)
 	{
-		dailyLimit = estCpc[theBestBidIndex] * estClicks[theBestBidIndex] / estConversions[theBestBidIndex];
+		dailyLimit = 5*estCpc[theBestBidIndex] * estClicks[theBestBidIndex] / estConversions[theBestBidIndex]; // need to change 5
+	}
+	
+	protected void setDailyLimit(double theDailyLimit)
+	{
+		dailyLimit = theDailyLimit;
 	}
 
 }
