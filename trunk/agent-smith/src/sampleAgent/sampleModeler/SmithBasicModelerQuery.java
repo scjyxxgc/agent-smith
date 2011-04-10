@@ -9,6 +9,7 @@ public class SmithBasicModelerQuery extends AgentComponentQuery {
 	/* estimated */
 	public Double 	[]	estCpc;
 	public Double 	[]	estImpressions;
+	public Integer	[]	estPositions;
 	
     /* actuals */
 	public Double	[]	cpc;
@@ -45,6 +46,7 @@ public class SmithBasicModelerQuery extends AgentComponentQuery {
 		estRevenue		=	new Double[TAU_SIMDAYS+3];
 		clicks			=	new Integer[TAU_SIMDAYS+3];
 		estClicks		=	new Double[TAU_SIMDAYS+3];
+		estPositions	=	new	Integer[TAU_SIMDAYS+3];
 		cumulativeClicksProbability			= 0.0;
 		cumulativeConversionsProbability	= 0.0;
 		estClicksProbability				= 0.0;
