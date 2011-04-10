@@ -1,5 +1,6 @@
 package sampleAgent.sampleModeler;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
@@ -16,6 +17,7 @@ public class SmithBasicModeler extends Modeler {
 
 	double decay;
     protected static double DECAY_DEFAULT = 0.1;
+    private static final double PRECISION = 0.0001;
 
 	protected Queue<SmithBasicModelerQuery> querySpace;
 	
@@ -98,6 +100,7 @@ public class SmithBasicModeler extends Modeler {
 			if (mquery.getQuery().equals(query)) {
 				result.setImpressions(mquery.estImpressions[day]);
 				result.setCpc(mquery.estCpc[day]);
+				result.setPosition(mquery.estPositions[day]);
 			}
 		}
 		return result;
@@ -109,5 +112,30 @@ public class SmithBasicModeler extends Modeler {
 	
 	public void simulationSetup() {
 		decay = aaConfig.getPropertyAsDouble("Decay", DECAY_DEFAULT);
+	}
+	
+	public void analizePositions(QueryReport queryReport){
+		//assemble a HashMap of all average positions per query
+		HashMap<Double, String> allAvgPositions = new HashMap<Double, String>();
+		PositionAnalyzer posAn = null;
+		for (SmithBasicModelerQuery query : querySpace) {
+			Set<String> advertisers = queryReport.advertisers(query.getQuery());
+			int localImpressions = queryReport.getImpressions(query.getQuery());
+			int maxImps = 3 * localImpressions; //TODO: get the actual number
+			double avgPos = 0.0;
+			for (String adv : advertisers){
+				if (adv != null){
+					avgPos = queryReport.getPosition(query.getQuery(), adv);
+					if (!Double.isNaN(avgPos)){
+						//truncate avgPos before inserting to map
+						avgPos = (int)(avgPos / PRECISION);
+						avgPos = avgPos * PRECISION;
+						allAvgPositions.put(avgPos, adv);
+					}
+				}
+			}
+			posAn = new PositionAnalyzer(allAvgPositions, localImpressions, maxImps);
+			// update query.estPositions[yday]
+		}
 	}
 }
