@@ -50,6 +50,7 @@ public class GameLogDataStruct
 		UserClickModelReportLog userClickModelReport;
 		ReserveInfoReportLog reserveInfoReport;
 		PublisherInfoReportLog publisherInfoReport;
+		BankStatusReportLog bankStatusReport;
 		
 		public GameReports(int gameId)
 		{
@@ -134,6 +135,16 @@ public class GameLogDataStruct
 		public PublisherInfoReportLog getPublisherInfoReportLog()
 		{
 			return publisherInfoReport;
+		}
+		
+		public void createBankStatusLog()
+		{
+			bankStatusReport = new BankStatusReportLog();
+		}
+
+		public BankStatusReportLog getBankStatusReportLog()
+		{
+			return bankStatusReport;
 		}
 		
 		/**
