@@ -67,6 +67,7 @@ public class GameLogParser extends Parser
 		myGameLogDataStruct.getGamesReports().get(simulationId).createUserClickModelReport();
 		myGameLogDataStruct.getGamesReports().get(simulationId).createReserveInfoReportLog();
 		myGameLogDataStruct.getGamesReports().get(simulationId).createPublisherInfoReportLog();
+		myGameLogDataStruct.getGamesReports().get(simulationId).createBankStatusLog();
 		
 		int agent;
 		participantNames = new String[participants.length];
@@ -155,6 +156,20 @@ public class GameLogParser extends Parser
 		DecimalFormat twoPlaces = new DecimalFormat("0.00");
 		myGameLogDataStruct.getGamesReports().get(simulationId).getPublisherInfoReportLog().addParticipantPublisherInfoReport(participantNames[receiver], day, twoPlaces.format(pi.getSquashingParameter()));
 	}
+	
+	private void BSparse(String bs, int sender, int receiver)
+	{
+		double bankStatus;
+		try
+		{
+			bankStatus = Double.parseDouble(bs);
+		} catch (Exception e)
+		{
+			bankStatus = 0;
+		}
+		
+		myGameLogDataStruct.getGamesReports().get(simulationId).getBankStatusReportLog().addParticipantBankStatusReport(participantNames[receiver], day, bankStatus);
+	}
 
 	private void AIparse(AdvertiserInfo ai, int sender, int receiver)
 	{
@@ -213,10 +228,15 @@ public class GameLogParser extends Parser
 		} else if (content instanceof AdvertiserInfo)
 		{
 			AIparse((AdvertiserInfo) content, sender, receiver);
-		} else if ((content instanceof BankStatus) || (content instanceof SimulationStatus) || (content instanceof StartInfo))
-		{
+		} else if ((content instanceof BankStatus))
+		{		
+			//System.out.println(day + ": " + participantNames[sender] + "->" + participantNames[receiver] + "," + content.toString());
+			BSparse(content.toString(), sender, receiver);
+		} 
+		else if ((content instanceof SimulationStatus) || (content instanceof StartInfo))
+		{		
 			System.out.println(day + ": " + participantNames[sender] + "->" + participantNames[receiver] + "," + content.toString());
-		} else
+		}else
 		{
 			System.out.println(day + ": " + "*** " + participantNames[sender] + "->" + participantNames[receiver] + "," + "Unhndeled: " + content.getClass());
 		}
