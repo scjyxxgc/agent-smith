@@ -1,9 +1,15 @@
 package sampleAgent.sampleModeler;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
+
+import trainer.GameLogDataStruct;
+import trainer.Constants.LogBidBundleReportParams;
+import trainer.Constants.LogQueryType;
+import trainer.Constants.LogSlotInfoReportParams;
 
 
 
@@ -55,6 +61,42 @@ public class SmithBasicModeler extends Modeler {
         	
         	query.setClicks(yday, queryReport.getClicks(query.getQuery()));
        	}
+	}
+	
+	public double estimateBestBid (int threshold, int gameId) {
+		ArrayList<Double>[] posBidArray = new ArrayList[9];
+		int pos = 0;
+		double bid = 0.0;
+		double avgBid = 0.0;
+		
+		String[] bidResults = GameLogDataStruct.getInstance().getGamesReports().get(gameId).getBidBundleReport().getSpecificParticipantAllBidBundleReport("myAgent").get(LogQueryType.p_d).get(LogBidBundleReportParams.bid);
+		String[] slotInfoResults = GameLogDataStruct.getInstance().getGamesReports().get(gameId).getSlotInfoReport().getSpecificParticipantAllSlotInfoReport("myAgent").get(LogSlotInfoReportParams.regularSlots);
+		
+		for (int i = 0; i <= posBidArray.length; i++)
+		{
+			posBidArray[i] = new ArrayList<Double>();
+		}
+		
+		for (int i = 0; i <= bidResults.length; i++)
+		{
+			pos = Integer.parseInt(slotInfoResults[i]);
+			bid = Double.parseDouble(bidResults[i]);
+			
+			posBidArray[pos].add(bid);
+		}
+		
+		for (int i = 1; i <= posBidArray.length; i++)
+		{
+			if (posBidArray[i].size() >= threshold)
+			{
+				double sum = 0;
+				for (int j =0; j <= posBidArray[i].size(); j++)
+					sum += posBidArray[i].get(j);
+				avgBid = sum / posBidArray[i].size();
+			}
+		}
+		
+		return avgBid;
 	}
 
 	public void handleSalesReport(SalesReport salesReport, int yday) {
