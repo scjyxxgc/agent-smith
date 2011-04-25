@@ -63,13 +63,13 @@ public class SmithBasicModeler extends Modeler {
        	}
 	}
 	
-	public double estimateBestBid (int threshold, int gameId) {
+	public double estimateBestBid (int threshold, int gameId, LogQueryType qt) {
 		ArrayList<Double>[] posBidArray = new ArrayList[9];
 		int pos = 0;
 		double bid = 0.0;
 		double avgBid = 0.0;
 		
-		String[] bidResults = GameLogDataStruct.getInstance().getGamesReports().get(gameId).getBidBundleReport().getSpecificParticipantAllBidBundleReport("myAgent").get(LogQueryType.p_d).get(LogBidBundleReportParams.bid);
+		String[] bidResults = GameLogDataStruct.getInstance().getGamesReports().get(gameId).getBidBundleReport().getSpecificParticipantAllBidBundleReport("myAgent").get(qt).get(LogBidBundleReportParams.bid);
 		String[] slotInfoResults = GameLogDataStruct.getInstance().getGamesReports().get(gameId).getSlotInfoReport().getSpecificParticipantAllSlotInfoReport("myAgent").get(LogSlotInfoReportParams.regularSlots);
 		
 		for (int i = 0; i <= posBidArray.length; i++)
