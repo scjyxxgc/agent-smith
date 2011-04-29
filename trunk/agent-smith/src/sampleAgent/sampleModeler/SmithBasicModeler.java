@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
+import java.util.SortedMap;
+
+import org.omg.CORBA.PRIVATE_MEMBER;
 
 import trainer.GameLogDataStruct;
 import trainer.Constants.LogBidBundleReportParams;
@@ -63,16 +66,18 @@ public class SmithBasicModeler extends Modeler {
        	}
 	}
 	
-	public double estimateBestBid (int threshold, int gameId, LogQueryType qt) {
-		ArrayList<Double>[] posBidArray = new ArrayList[9];
+	public HashMap<Double, Integer> estimateBestBid (int gameId, LogQueryType qt) {
+		final int numOfPlayers = 9;
+		ArrayList<Double>[] posBidArray = new ArrayList[numOfPlayers];
 		int pos = 0;
 		double bid = 0.0;
-		double avgBid = 0.0;
+		HashMap<Double, Integer> avgBidPos = new HashMap<Double, Integer>();
 		
 		String[] bidResults = GameLogDataStruct.getInstance().getGamesReports().get(gameId).getBidBundleReport().getSpecificParticipantAllBidBundleReport("myAgent").get(qt).get(LogBidBundleReportParams.bid);
 		String[] slotInfoResults = GameLogDataStruct.getInstance().getGamesReports().get(gameId).getSlotInfoReport().getSpecificParticipantAllSlotInfoReport("myAgent").get(LogSlotInfoReportParams.regularSlots);
 		
-		for (int i = 0; i <= posBidArray.length; i++)
+		//init
+		for (int i = 0; i <= numOfPlayers; i++)
 		{
 			posBidArray[i] = new ArrayList<Double>();
 		}
@@ -85,18 +90,19 @@ public class SmithBasicModeler extends Modeler {
 			posBidArray[pos].add(bid);
 		}
 		
-		for (int i = 1; i <= posBidArray.length; i++)
+		for (int i = 1; i <= numOfPlayers; i++)
 		{
-			if (posBidArray[i].size() >= threshold)
+			double avg = 0.0;
+			double sum = 0.0;
+			for (int j = 0; j <= posBidArray[i].size(); j++)
 			{
-				double sum = 0;
-				for (int j =0; j <= posBidArray[i].size(); j++)
-					sum += posBidArray[i].get(j);
-				avgBid = sum / posBidArray[i].size();
+				sum += posBidArray[i].get(j);
 			}
+			avg = sum / posBidArray[i].size();
+			avgBidPos.put(avg, i);
 		}
 		
-		return avgBid;
+		return avgBidPos;
 	}
 
 	public void handleSalesReport(SalesReport salesReport, int yday) {
