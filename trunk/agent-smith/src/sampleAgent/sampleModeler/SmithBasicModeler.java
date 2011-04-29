@@ -5,15 +5,11 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
-import java.util.SortedMap;
-
-import org.omg.CORBA.PRIVATE_MEMBER;
 
 import trainer.GameLogDataStruct;
 import trainer.Constants.LogBidBundleReportParams;
 import trainer.Constants.LogQueryType;
 import trainer.Constants.LogSlotInfoReportParams;
-
 
 
 import edu.umich.eecs.tac.props.Ad;
@@ -27,14 +23,16 @@ public class SmithBasicModeler extends Modeler {
 	double decay;
     protected static double DECAY_DEFAULT = 0.1;
     private static final double PRECISION = 0.0001;
+    private static final int numOfPlayers = 8;
 
 	protected Queue<SmithBasicModelerQuery> querySpace;
+	protected HashMap<Query, HashMap<Double, Integer>> avgBidPositions;
 	
 	public void simulationReady() {
 		Set<Query> querySet = aaAgent.getQuerySet();
 		
 		for(Query query : querySet) { 
-        	querySpace.add(new SmithBasicModelerQuery(query));        	
+        	querySpace.add(new SmithBasicModelerQuery(query));
         }
 	}
 	
@@ -67,8 +65,7 @@ public class SmithBasicModeler extends Modeler {
 	}
 	
 	public HashMap<Double, Integer> estimateBestBid (int gameId, LogQueryType qt) {
-		final int numOfPlayers = 9;
-		ArrayList<Double>[] posBidArray = new ArrayList[numOfPlayers];
+		ArrayList<Double>[] posBidArray = new ArrayList[numOfPlayers + 1];
 		int pos = 0;
 		double bid = 0.0;
 		HashMap<Double, Integer> avgBidPos = new HashMap<Double, Integer>();
@@ -103,6 +100,47 @@ public class SmithBasicModeler extends Modeler {
 		}
 		
 		return avgBidPos;
+	}
+	
+	public int getEstimatedPosByBid(Query query, double bid){
+		HashMap<Double, Integer> localMap;
+		if (avgBidPositions.containsKey(query) == false){
+			//TODO: change game ID from 0 to an actual game ID
+			avgBidPositions.put(query, estimateBestBid(0, convertToQueryLogType(query)));
+		}
+		
+		localMap = avgBidPositions.get(query);
+		double tmpLow = 0.0;
+		double tmpHigh = 0.0;
+		for (int index = 0; index < localMap.size(); index++){
+			if (bid >= (Double)localMap.keySet().toArray()[index]){
+				tmpLow = (Double)localMap.keySet().toArray()[index];
+				try {
+					tmpHigh = (Double)localMap.keySet().toArray()[index + 1];
+				}
+				catch (ArrayIndexOutOfBoundsException e){
+					return numOfPlayers;
+				}
+			}
+		}
+		
+		if ((bid - tmpLow) < (tmpHigh - bid)){
+			return localMap.get(tmpLow);
+		}
+		else {
+			return localMap.get(tmpHigh);
+		}
+	}
+
+	private LogQueryType convertToQueryLogType(Query query) {
+		for (LogQueryType qt : LogQueryType.values())
+		{
+			if ((qt.getComponent().equalsIgnoreCase(query.getComponent())) &&
+				(qt.getManufacturer().equalsIgnoreCase(query.getManufacturer()))){
+				return qt;
+			}
+		}
+		return null;
 	}
 
 	public void handleSalesReport(SalesReport salesReport, int yday) {
@@ -148,7 +186,8 @@ public class SmithBasicModeler extends Modeler {
 			if (mquery.getQuery().equals(query)) {
 				result.setImpressions(mquery.estImpressions[day]);
 				result.setCpc(mquery.estCpc[day]);
-				result.setPosition(mquery.estPositions[day]);
+				//result.setPosition(mquery.estPositions[day]);
+				result.setPosition(getEstimatedPosByBid(mquery.getQuery(), bid));
 			}
 		}
 		return result;
