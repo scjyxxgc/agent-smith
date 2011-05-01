@@ -44,10 +44,10 @@ public class GameLogHandler extends LogHandler
 		System.out.println("Game ID " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getGameId());
 		
 		System.out.println("\n*************************  Query Reports  ***************************");
-		System.out.println("All particiants query reports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getQueryReport().getAllParticipantsQueryReports().keySet().toString());
-		System.out.println("All of myAgent query reports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getQueryReport().getSpecificParticipantAllQueryReport("myAgent").keySet().toString());
-		System.out.println("Participant Query Report my myAgent, query p_d:");
-		String[] cpcREsults = GameLogDataStruct.getInstance().getGamesReports().get(gameId).getQueryReport().getSpecificParticipantAllQueryReport("myAgent").get(LogQueryType.p_d).get(LogQueryReportParams.cpc);
+		System.out.println("All participants query reports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getQueryReport().getAllParticipantsQueryReports().keySet().toString());
+		System.out.println("All of Agent-Smith's query reports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getQueryReport().getSpecificParticipantAllQueryReport("Agent-Smith").keySet().toString());
+		System.out.println("Participant Query Report my Agent-Smith, query p_d:");
+		String[] cpcREsults = GameLogDataStruct.getInstance().getGamesReports().get(gameId).getQueryReport().getSpecificParticipantAllQueryReport("Agent-Smith").get(LogQueryType.p_d).get(LogQueryReportParams.cpc);
 		for (int i = 0; i < cpcREsults.length; i++)
 		{
 			System.out.println(cpcREsults[i]);
@@ -55,9 +55,9 @@ public class GameLogHandler extends LogHandler
 		
 		System.out.println("\n*************************  Sales Reports  ***************************");
 		System.out.println("All particiants sales reports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getSalesReport().getAllParticipantsSalesReports().keySet().toString());
-		System.out.println("All of myAgent slaes reports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getSalesReport().getSpecificParticipantAllSalesReport("myAgent").keySet().toString());
-		System.out.println("Participant sales Report my myAgent, query p_d:");
-		String[] impressionsResults = GameLogDataStruct.getInstance().getGamesReports().get(gameId).getSalesReport().getSpecificParticipantAllSalesReport("myAgent").get(LogQueryType.p_d).get(LogSalesReportParams.impressions);
+		System.out.println("All of Agent-Smith slaes reports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getSalesReport().getSpecificParticipantAllSalesReport("Agent-Smith").keySet().toString());
+		System.out.println("Participant sales Report my Agent-Smith, query p_d:");
+		String[] impressionsResults = GameLogDataStruct.getInstance().getGamesReports().get(gameId).getSalesReport().getSpecificParticipantAllSalesReport("Agent-Smith").get(LogQueryType.p_d).get(LogSalesReportParams.impressions);
 		for (int i = 0; i < impressionsResults.length; i++)
 		{
 			System.out.println(impressionsResults[i]);
@@ -65,9 +65,9 @@ public class GameLogHandler extends LogHandler
 		
 		System.out.println("\n*************************  Bid Bundle Reports  ***************************");
 		System.out.println("All particiants bid bundle reports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getBidBundleReport().getAllParticipantsBidBundleReports().keySet().toString());
-		System.out.println("All of myAgent bid bundle reports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getBidBundleReport().getSpecificParticipantAllBidBundleReport("myAgent").keySet().toString());
-		System.out.println("Participant bid bundle Report my myAgent, query p_d:");
-		String[] bidResults = GameLogDataStruct.getInstance().getGamesReports().get(gameId).getBidBundleReport().getSpecificParticipantAllBidBundleReport("myAgent").get(LogQueryType.p_d).get(LogBidBundleReportParams.bid);
+		System.out.println("All of Agent-Smith bid bundle reports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getBidBundleReport().getSpecificParticipantAllBidBundleReport("Agent-Smith").keySet().toString());
+		System.out.println("Participant bid bundle Report my Agent-Smith, query p_d:");
+		String[] bidResults = GameLogDataStruct.getInstance().getGamesReports().get(gameId).getBidBundleReport().getSpecificParticipantAllBidBundleReport("Agent-Smith").get(LogQueryType.p_d).get(LogBidBundleReportParams.bid);
 		for (int i = 0; i < bidResults.length; i++)
 		{
 			System.out.println(bidResults[i]);
@@ -75,9 +75,9 @@ public class GameLogHandler extends LogHandler
 		
 		System.out.println("\n*************************  Retail Catalog Reports  ***************************");
 		System.out.println("All particiants Retail Catalog reports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getRetailCatalogReport().getAllParticipantsRetailCatalogReports().keySet().toString());
-		System.out.println("All of myAgent Retail Catalog reports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getRetailCatalogReport().getSpecificParticipantAllRetailCatalogReport("myAgent").keySet().toString());
-		System.out.println("Participant Retail Catalog Report my myAgent, query p_d:");
-		String[] salesProfitResults = GameLogDataStruct.getInstance().getGamesReports().get(gameId).getRetailCatalogReport().getSpecificParticipantAllRetailCatalogReport("myAgent").get(LogProduct.p_d).get(LogRetailCatalogReportParams.salesProfit);
+		System.out.println("All of Agent-Smith Retail Catalog reports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getRetailCatalogReport().getSpecificParticipantAllRetailCatalogReport("Agent-Smith").keySet().toString());
+		System.out.println("Participant Retail Catalog Report my Agent-Smith, query p_d:");
+		String[] salesProfitResults = GameLogDataStruct.getInstance().getGamesReports().get(gameId).getRetailCatalogReport().getSpecificParticipantAllRetailCatalogReport("Agent-Smith").get(LogProduct.p_d).get(LogRetailCatalogReportParams.salesProfit);
 		for (int i = 0; i < salesProfitResults.length; i++)
 		{
 			System.out.println(salesProfitResults[i]);
@@ -85,9 +85,9 @@ public class GameLogHandler extends LogHandler
 		
 		System.out.println("\n*************************  Slot Info Reports  ***************************");
 		System.out.println("All particiants Slot Info reports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getSlotInfoReport().getAllParticipantsSlotInfoReports().keySet().toString());
-		System.out.println("All of myAgent Slot Info reports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getSlotInfoReport().getSpecificParticipantAllSlotInfoReport("myAgent").keySet().toString());
-		System.out.println("Participant Slot Info Report my myAgent:");
-		String[] slotInfoResults = GameLogDataStruct.getInstance().getGamesReports().get(gameId).getSlotInfoReport().getSpecificParticipantAllSlotInfoReport("myAgent").get(LogSlotInfoReportParams.regularSlots);
+		System.out.println("All of Agent-Smith Slot Info reports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getSlotInfoReport().getSpecificParticipantAllSlotInfoReport("Agent-Smith").keySet().toString());
+		System.out.println("Participant Slot Info Report my Agent-Smith:");
+		String[] slotInfoResults = GameLogDataStruct.getInstance().getGamesReports().get(gameId).getSlotInfoReport().getSpecificParticipantAllSlotInfoReport("Agent-Smith").get(LogSlotInfoReportParams.regularSlots);
 		for (int i = 0; i < slotInfoResults.length; i++)
 		{
 			System.out.println(slotInfoResults[i]);
@@ -111,7 +111,7 @@ public class GameLogHandler extends LogHandler
 		
 		System.out.println("\n*************************  Reserve Info Reports  ***************************");
 		System.out.println("All particiants Reserve Info reports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getReserveInfoReportLog().getAllParticipantsReserveInfoReports().keySet().toString());
-		System.out.println("All of myAgent Reserve Info reports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getReserveInfoReportLog().getSpecificParticipantAllReserveInfoReport("users").keySet().toString());
+		System.out.println("All of Agent-Smith Reserve Info reports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getReserveInfoReportLog().getSpecificParticipantAllReserveInfoReport("users").keySet().toString());
 		System.out.println("Participant Reserve Info Report users:");
 		String[] reserveInfoResults = GameLogDataStruct.getInstance().getGamesReports().get(gameId).getReserveInfoReportLog().getSpecificParticipantAllReserveInfoReport("users").get(LogReserveInfoReportParams.regularReserve);
 		for (int i = 0; i < reserveInfoResults.length; i++)
@@ -121,9 +121,9 @@ public class GameLogHandler extends LogHandler
 		
 		System.out.println("\n*************************  Publisher Info Reports  ***************************");
 		System.out.println("All particiants Publisher Info reports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getPublisherInfoReportLog().getAllParticipantsPublisherInfoReports().keySet().toString());
-		System.out.println("All of myAgent Publisher Info reports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getPublisherInfoReportLog().getSpecificParticipantAllPublisherInfoReport("myAgent").keySet().toString());
-		System.out.println("Participant Publisher Info Report my myAgent:");
-		String[] publisherInfoResults = GameLogDataStruct.getInstance().getGamesReports().get(gameId).getPublisherInfoReportLog().getSpecificParticipantAllPublisherInfoReport("myAgent").get(LogPublisherInfoReportParams.squashingParameter);
+		System.out.println("All of Agent-Smith Publisher Info reports " + GameLogDataStruct.getInstance().getGamesReports().get(gameId).getPublisherInfoReportLog().getSpecificParticipantAllPublisherInfoReport("Agent-Smith").keySet().toString());
+		System.out.println("Participant Publisher Info Report my Agent-Smith:");
+		String[] publisherInfoResults = GameLogDataStruct.getInstance().getGamesReports().get(gameId).getPublisherInfoReportLog().getSpecificParticipantAllPublisherInfoReport("Agent-Smith").get(LogPublisherInfoReportParams.squashingParameter);
 		for (int i = 0; i < publisherInfoResults.length; i++)
 		{
 			System.out.println(publisherInfoResults[i]);

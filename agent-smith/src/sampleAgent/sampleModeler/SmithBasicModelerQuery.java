@@ -1,6 +1,9 @@
 package sampleAgent.sampleModeler;
 
 import static arch.AgentConstants.TAU_SIMDAYS;
+
+import java.util.ArrayList;
+
 import edu.umich.eecs.tac.props.Query;
 import arch.AgentComponentQuery;
 
@@ -9,7 +12,6 @@ public class SmithBasicModelerQuery extends AgentComponentQuery {
 	/* estimated */
 	public Double 	[]	estCpc;
 	public Double 	[]	estImpressions;
-	public Integer	[]	estPositions;
 	
     /* actuals */
 	public Double	[]	cpc;
@@ -18,6 +20,7 @@ public class SmithBasicModelerQuery extends AgentComponentQuery {
 	/* initial defaults */
     protected static double CPC_INIT = 2.0;
     protected static double IMPR_INIT = 100.0;
+    protected static int POS_INIT = 8;
     
     /* sales report */
     protected	Integer	[]	conversions;
@@ -28,10 +31,8 @@ public class SmithBasicModelerQuery extends AgentComponentQuery {
     protected	Integer	[]	clicks;
     protected	Double	[]	estClicks;
     
-    protected	Double		cumulativeClicksProbability;
-    protected	Double		cumulativeConversionsProbability;
-    protected	Double		estClicksProbability;
-    protected	Double		estConversionsProbability;
+    protected ArrayList<Double> gameBids;
+	protected ArrayList<Integer> gamePos;
     
 	public SmithBasicModelerQuery(Query q) {
 		super(q);
@@ -46,11 +47,8 @@ public class SmithBasicModelerQuery extends AgentComponentQuery {
 		estRevenue		=	new Double[TAU_SIMDAYS+3];
 		clicks			=	new Integer[TAU_SIMDAYS+3];
 		estClicks		=	new Double[TAU_SIMDAYS+3];
-		estPositions	=	new	Integer[TAU_SIMDAYS+3];
-		cumulativeClicksProbability			= 0.0;
-		cumulativeConversionsProbability	= 0.0;
-		estClicksProbability				= 0.0;
-		estConversionsProbability			= 0.0;
+		gameBids		=	new ArrayList<Double>();
+		gamePos			=	new ArrayList<Integer>();
 		
 		nextDay(0);
 	}
@@ -112,37 +110,5 @@ public class SmithBasicModelerQuery extends AgentComponentQuery {
 	
 	public void setEstClicks(int ind, double elem){
 		this.estClicks[ind] = elem;
-	}
-	
-	public void addToCumulativeClicksProbability(double ratio){
-		this.cumulativeClicksProbability += ratio;
-	}
-	
-	public void addToCumulativeConversionsProbability(double ratio){
-		this.cumulativeConversionsProbability += ratio;
-	}
-	
-	public double getCumulativeClicksProbability(){
-		return this.cumulativeClicksProbability;
-	}
-	
-	public double getCumulativeConversionsProbability(){
-		return this.cumulativeConversionsProbability;
-	}
-	
-	public void setEstClicksProbability(double value){
-		this.estClicksProbability = value;
-	}
-	
-	public void setEstConversionsProbability(double value){
-		this.estConversionsProbability = value;
-	}
-	
-	public double getEstClicksProbability(){
-		return this.estClicksProbability;
-	}
-	
-	public double getEstConversionsProbability(){
-		return this.estConversionsProbability;
 	}
 }
