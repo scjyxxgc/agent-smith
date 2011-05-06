@@ -28,7 +28,8 @@ public class SmithBasicModeler extends Modeler {
 	private int joinNumber = 0;
 
 	protected Queue<SmithBasicModelerQuery> querySpace;
-	protected HashMap<Query, HashMap<Double, Integer>> avgBidPositions;
+	protected HashMap<Query, HashMap<Double, Integer>> avgBidPositionsByLog;
+	protected HashMap<Query, HashMap<Double, Integer>> avgBidPositionsByCurrGame;
 
 	public void simulationReady() {
 		Set<Query> querySet = aaAgent.getQuerySet();
@@ -48,7 +49,8 @@ public class SmithBasicModeler extends Modeler {
 
 	public SmithBasicModeler() {
 		querySpace = new LinkedList<SmithBasicModelerQuery>();
-		avgBidPositions = new HashMap<Query, HashMap<Double,Integer>>();
+		avgBidPositionsByLog = new HashMap<Query, HashMap<Double,Integer>>();
+		avgBidPositionsByCurrGame = new HashMap<Query, HashMap<Double,Integer>>();
 	}
 
 	public void handleQueryReport(QueryReport queryReport, int yday) {
@@ -149,42 +151,85 @@ public class SmithBasicModeler extends Modeler {
 		return avgBidPos;
 	}
 
-	public int getEstimatedPosByBid(SmithBasicModelerQuery query, double bid){
+	public double getEstimatedPosByBid(SmithBasicModelerQuery query, double bid, int day){
 		HashMap<Double, Integer> localMap = new HashMap<Double, Integer>();
-		if (avgBidPositions.containsKey(query.getQuery()) == false){
-			if (joinNumber > 0)
-			{
-				avgBidPositions.put(query.getQuery(), estimatePosByLog(simID-1, convertToQueryLogType(query.getQuery())));
-			} else {
-				avgBidPositions.put(query.getQuery(), estimatePosByCurrGame(query));
+		int daySum = 0;
+		double avgPos = 0.0;
+		double avgPosLog = 0.0;
+		double avgPosCurr = 0.0;
+		double CURR_FACTOR = 0.0;
+		double LOG_FACTOR = 0.0;
+		// if we played at least once
+		if (joinNumber > 0)
+		{
+			if (avgBidPositionsByLog.containsKey(query.getQuery()) == false){
+				avgBidPositionsByLog.put(query.getQuery(), estimatePosByLog(simID-1, convertToQueryLogType(query.getQuery())));
 			}
+			daySum = 60 + day;
+			LOG_FACTOR = 0.5;
+			CURR_FACTOR = 0.5;
+		} else {
+			daySum = day;
+			LOG_FACTOR = 0.0;
+			CURR_FACTOR = 1.0;
 		}
+		
+		if (avgBidPositionsByCurrGame.containsKey(query.getQuery()) == false){
+			avgBidPositionsByCurrGame.put(query.getQuery(), estimatePosByCurrGame(query));
+		}
+		
 
-		if (avgBidPositions.containsKey(query) == true){
-			localMap.putAll(avgBidPositions.get(query));
-			double tmpLow = 0.0;
-			double tmpHigh = 0.0;
+		if (avgBidPositionsByLog.containsKey(query) == true){
+			localMap.putAll(avgBidPositionsByLog.get(query));
+			double tmpLowLog = 0.0;
+			double tmpHighLog = 0.0;
 			for (int index = 0; index < localMap.size(); index++){
 				if (bid >= (Double)localMap.keySet().toArray()[index]){
-					tmpLow = (Double)localMap.keySet().toArray()[index];
+					tmpLowLog = (Double)localMap.keySet().toArray()[index];
 					try {
-						tmpHigh = (Double)localMap.keySet().toArray()[index + 1];
+						tmpHighLog = (Double)localMap.keySet().toArray()[index + 1];
 					}
 					catch (ArrayIndexOutOfBoundsException e){
-						return NUM_OF_PLAYERS;
+						tmpHighLog = tmpLowLog;
 					}
 				}
 			}
 
-			if ((bid - tmpLow) < (tmpHigh - bid)){
-				return localMap.get(tmpLow);
+			if (Math.abs(bid - tmpLowLog) <= Math.abs(tmpHighLog - bid)){
+				avgPosLog = localMap.get(tmpLowLog);
 			}
 			else {
-				return localMap.get(tmpHigh);
+				avgPosLog = localMap.get(tmpHighLog);
 			}
-		} else {
-			return NUM_OF_PLAYERS;
 		}
+			
+		if (avgBidPositionsByCurrGame.containsKey(query) == true){
+			localMap.putAll(avgBidPositionsByCurrGame.get(query));
+			double tmpLowCurr = 0.0;
+			double tmpHighCurr = 0.0;
+			for (int index = 0; index < localMap.size(); index++){
+				if (bid >= (Double)localMap.keySet().toArray()[index]){
+					tmpLowCurr = (Double)localMap.keySet().toArray()[index];
+					try {
+						tmpHighCurr = (Double)localMap.keySet().toArray()[index + 1];
+					}
+					catch (ArrayIndexOutOfBoundsException e){
+						tmpHighCurr = tmpLowCurr;
+					}
+				}
+			}
+
+			if (Math.abs(bid - tmpLowCurr) <= Math.abs(tmpHighCurr - bid)){
+				avgPosCurr = localMap.get(tmpLowCurr);
+			}
+			else {
+				avgPosCurr = localMap.get(tmpHighCurr);
+			}
+		}
+		
+		avgPos = (avgPosLog * 0.5 * LOG_FACTOR) + (avgPosCurr * day/daySum * CURR_FACTOR);
+		return avgPos;
+		
 	}
 
 	private LogQueryType convertToQueryLogType(Query query) {
@@ -249,7 +294,7 @@ public class SmithBasicModeler extends Modeler {
 			if (mquery.getQuery().equals(query)) {
 				result.setImpressions(mquery.estImpressions[day]);
 				result.setCpc(mquery.estCpc[day]);
-				result.setPosition(getEstimatedPosByBid(mquery, bid));
+				result.setPosition(getEstimatedPosByBid(mquery, bid, day));
 			}
 		}
 		return result;
@@ -257,7 +302,8 @@ public class SmithBasicModeler extends Modeler {
 
 	public void simulationFinished() {
 		querySpace.clear();
-		avgBidPositions.clear();
+		avgBidPositionsByLog.clear();
+		avgBidPositionsByCurrGame.clear();
 	}
 
 	public void simulationSetup() {
