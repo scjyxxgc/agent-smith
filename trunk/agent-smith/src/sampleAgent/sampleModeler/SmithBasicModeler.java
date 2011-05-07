@@ -160,8 +160,14 @@ public class SmithBasicModeler extends Modeler {
 		double CURR_FACTOR = 0.0;
 		double LOG_FACTOR = 0.0;
 		// if we played at least once
-		if (joinNumber > 0)
+		System.out.println("simID = " + simID);
+		System.out.println("GameLogDataStruct.getInstance().getGamesReports().containsKey("+(simID-1)+") = "+GameLogDataStruct.getInstance().getGamesReports().containsKey(simID));
+		//if (joinNumber > 0)
+		if ((true  == GameLogDataStruct.getInstance().getGamesReports().containsKey(simID-1)) &&
+			(false == GameLogDataStruct.getInstance().getGamesReports().get(simID-1).getPublisherInfoReportLog().getSpecificParticipantAllPublisherInfoReport("Agent-Smith").isEmpty()))
 		{
+			System.out.println("GameLogDataStruct.getInstance().getGamesReports().get("+(simID-1)+").getPublisherInfoReportLog().getSpecificParticipantAllPublisherInfoReport(\"Agent-Smith\").isEmpty() = "+GameLogDataStruct.getInstance().getGamesReports().get(simID-1).getPublisherInfoReportLog().getSpecificParticipantAllPublisherInfoReport("Agent-Smith").isEmpty());
+			System.out.println("\nUsing data from log of game number " + (simID-1));
 			if (avgBidPositionsByLog.containsKey(query.getQuery()) == false){
 				avgBidPositionsByLog.put(query.getQuery(), estimatePosByLog(simID-1, convertToQueryLogType(query.getQuery())));
 			}
