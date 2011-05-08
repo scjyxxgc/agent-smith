@@ -35,8 +35,8 @@ public class MyBasicEstimator extends Estimator {
     double [] estConvRateWindow = new double[NUM_OF_DAYS]; //for query.estConvRate
     double [] estClickRateWindow = new double[NUM_OF_DAYS]; //for query.estClickRate
     double [] estSalesWindow = new double[NUM_OF_DAYS]; //for query.estSales
-   
-   	protected Queue<MyBasicEstimatorQuery> querySpace;
+    
+    	protected Queue<MyBasicEstimatorQuery> querySpace;
 	/**public class BasicEstimatorQuery extends AgentComponentQuery {
 	public Double 	[]estSales; []estConvRate; []estClickRate;
     public int 		[]sales; []clicks;
@@ -67,11 +67,11 @@ public class MyBasicEstimator extends Estimator {
 */
    	
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-//estimate y = ax + b
-//y is estimated ConvRate or ClickRate or Sales.
-//x previous actual result
-//if no boost and we have minimum 5 days behind: xVals = {x1, x2, x3} and numDays = 3 ??????????????
-   	
+    	//estimate y = ax + b
+    	//y is estimated ConvRate or ClickRate or Sales.
+    	//x previous actual result
+    	//if no boost and we have minimum 5 days behind: xVals = {x1, x2, x3} and numDays = 3 ??????????????
+
 public double LinearRegression(double[] yArr, double[] xVals, int numDays)
 {
    		
@@ -117,13 +117,24 @@ public double LinearRegression(double[] yArr, double[] xVals, int numDays)
         	querySpace.add(new MyBasicEstimatorQuery(query));        	
         }
 		 
-		//why o to 60 ?
-		 for (int i=0; i<61; i++)
+		for (int i=0; i<60; i++)
 		 {
 			 convRateArr[i]=0;
 			 clickRateArr[i]=0;
 			 salesArr[i]=0; 
 		 }
+		
+		//CHANGE1 - putting zeroes in other arrays too
+		for (int i=0; i<NUM_OF_DAYS; i++)
+		 {
+			convRateWindow[i]=0;
+			clickRateWindow[i]=0;
+			salesWindow[i]=0;
+			estConvRateWindow[i]=0;
+			estClickRateWindow[i]=0;
+			estSalesWindow[i]=0;
+		 }
+				
 	}
 	
 	public void nextDay(int day) {
@@ -138,8 +149,7 @@ public double LinearRegression(double[] yArr, double[] xVals, int numDays)
 				
 		for(MyBasicEstimatorQuery query : querySpace) 
 		{      	
-        
-			query.clicks[yday] = queryReport.getClicks(query.getQuery());
+        	query.clicks[yday] = queryReport.getClicks(query.getQuery());
          	impressions = queryReport.getImpressions(query.getQuery());
          		
         	/* update estimates */
@@ -149,34 +159,62 @@ public double LinearRegression(double[] yArr, double[] xVals, int numDays)
            	else 
            		query.clickRate[yday] = (double)(query.clicks[yday])/(double)(impressions);
 
-        	
         	if (query.clicks[yday] == 0) 
-           		query.convRate[yday] = 0.0;
+           		 query.convRate[yday] = 0.0;
         	else
-           		query.convRate[yday] = (double)(query.sales[yday])/(double)(query.clicks[yday]);
+           		 query.convRate[yday] = (double)(query.sales[yday])/(double)(query.clicks[yday]);
 
         	//query.estConvRate[yday+2] = decay*query.convRate[yday]+(1-decay)*(query.estConvRate[yday+1]+b1[yday+1]);
         	//b1[yday+2]=gamma*(query.estConvRate[yday+2]-query.estConvRate[yday+1])+(1-gamma)*b1[yday+1];
         	
         	//build window and estimates
-        	for(int i = 0; i < NUM_OF_DAYS; i++) 
+        	for(int i = 0; i < NUM_OF_DAYS-2; i++) 
         	{
-        		convRateWindow[i] = query.convRate[yday-2 + i];
-        		estConvRateWindow[i] = query.estConvRate[yday-2 + i];
-        	}
-        	query.estConvRate[yday+2] = LinearRegression(estConvRateWindow, convRateWindow, NUM_OF_DAYS);
-        	
+        		if (yday<=3)
+    			    {
+    				convRateWindow[i] = 0;
+    				estConvRateWindow[i] = 0;
+    			    }
+    			else {
+        		convRateWindow[i] = query.convRate[yday-3 + i];
+        		estConvRateWindow[i] = query.estConvRate[yday-3 + i];
+        	          }
+        	}//end for
+        	//query.estConvRate[yday+2] = LinearRegression(estConvRateWindow, convRateWindow, NUM_OF_DAYS);
+        	query.estConvRate[yday+2] = LinearRegression(estConvRateWindow, convRateWindow, NUM_OF_DAYS-2);
         	
         	//query.estClickRate[yday+2] = decay*query.clickRate[yday]+(1-decay)*(query.estClickRate[yday+1]+b2[yday+1]);
         	//b2[yday+2]=gamma*(query.estClickRate[yday+2]-query.estClickRate[yday+1])+(1-gamma)*b2[yday+1];
         	
         	//build window and estimates
-        	for(int i = 0; i < NUM_OF_DAYS; i++) 
+        	/*for(int i = 0; i < NUM_OF_DAYS; i++) 
         	{
+        		//if (yday<2) ?????
+        		if (yday<3)
+        			{
+        				clickRateWindow[i] = 0;
+        				estClickRateWindow[i] = 0;
+        			}
+        			else {
         		clickRateWindow[i] = query.clickRate[yday-2 + i];
         		estClickRateWindow[i] = query.estClickRate[yday-2 + i];
-        	}
-        	query.estClickRate[yday+2] = LinearRegression(estClickRateWindow, clickRateWindow, NUM_OF_DAYS);
+        	              }
+        	}//end for
+        	*/
+        	for(int i = 0; i < NUM_OF_DAYS-2; i++) 
+        	{
+        		//if (yday<2) ?????
+        		if (yday<=3)
+        			{
+        				clickRateWindow[i] = 0;
+        				estClickRateWindow[i] = 0;
+        			}
+        			else {
+        		clickRateWindow[i] = query.clickRate[yday-3 + i];
+        		estClickRateWindow[i] = query.estClickRate[yday-3 + i];
+        	              }
+        	}//end for
+        	query.estClickRate[yday+2] = LinearRegression(estClickRateWindow, clickRateWindow, NUM_OF_DAYS-2);
 		}
 	}
 
@@ -186,16 +224,36 @@ public double LinearRegression(double[] yArr, double[] xVals, int numDays)
 		for(MyBasicEstimatorQuery query : querySpace) {      	
         	query.sales[yday] = salesReport.getConversions(query.getQuery());
         	
-        	//query.estSales[yday+2] = decay*query.sales[yday]+(1-decay)*(query.estSales[yday+1]+b3[yday+1]);
+        	//query.estSales[Day+2] = decay*query.sales[yday]+(1-decay)*(query.estSales[yday+1]+b3[yday+1]);
         	//b3[yday+2]=gamma*(query.estSales[yday+2]-query.estSales[yday+1])+(1-gamma)*b3[yday+1];
         	
         	//build window and estimates
-        	for(int i = 0; i < NUM_OF_DAYS; i++) 
+        	/*for(int i = 0; i < NUM_OF_DAYS; i++) 
         	{
+        		if (yday<3)
+    			{
+        			salesWindow[i] = 0;
+        			estSalesWindow[i] = 0;
+    			}
+    			else {
         		salesWindow[i] = query.sales[yday-2 + i];
         		estSalesWindow[i] = query.estSales[yday-2 + i];
         	}
-        	query.estSales[yday+2] = LinearRegression(estSalesWindow, salesWindow, NUM_OF_DAYS);
+        	}//end for
+        	*/
+        	for(int i = 0; i < NUM_OF_DAYS-2; i++) 
+        	{
+        		if (yday<=3)
+    			{
+        			salesWindow[i] = 0;
+        			estSalesWindow[i] = 0;
+    			}
+    			else {
+        		salesWindow[i] = query.sales[yday-3 + i];
+        		estSalesWindow[i] = query.estSales[yday-3 + i];
+        	}
+        	}//end for
+        	query.estSales[yday+2] = LinearRegression(estSalesWindow, salesWindow, NUM_OF_DAYS-2);
         	
         	if (query.sales[yday]!=0)
         		query.profitPerUnitSold[yday] = salesReport.getRevenue(query.getQuery())/query.sales[yday];
@@ -281,3 +339,4 @@ public double LinearRegression(double[] yArr, double[] xVals, int numDays)
 	}
 	
 }
+
