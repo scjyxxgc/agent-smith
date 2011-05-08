@@ -97,7 +97,7 @@ public class AgentSmithOptimizer extends Optimizer
 	
 	protected EquateROI equateRoiInstance;
 	
-	protected boolean useEquateRoiAlgorithm = true;
+	protected boolean useEquateRoiAlgorithm = false;
 	
 	protected int sim_id;
 
@@ -192,11 +192,13 @@ public class AgentSmithOptimizer extends Optimizer
 
 			if(useEquateRoiAlgorithm)
 			{
-				bidBundle.setBid(query, optquery.equateRoiBid);    
+				bidBundle.setBid(query, optquery.equateRoiBid);
+				GameLogDataStruct.getInstance().addLastBid(query, optquery.equateRoiBid);
 			}
 			else
 			{
 				bidBundle.setBid(query, optquery.bids[optquery.bestBidIndex]);
+				GameLogDataStruct.getInstance().addLastBid(query, optquery.bids[optquery.bestBidIndex]);
 			}
 			
 			bidBundle.setAd(query, optquery.ad);
@@ -301,6 +303,7 @@ public class AgentSmithOptimizer extends Optimizer
 				{
 					estimated = aaEstimator.estimateQuery(query.getQuery(), query.bids[bidIndex], query.ad, query.dailyLimit, yday + 2);		
 					query.setEstimates(bidIndex, estimated.getImpressions(), estimated.getCpc(), estimated.getConversions(), estimated.getClicks(), estimated.getProfits());
+					//System.out.println(query.getQuery().getManufacturer() + "_" + query.getQuery().getComponent() + ", getCpc=" + estimated.getCpc() + ", getConversions()=" + estimated.getConversions() + ", getClicks=" + estimated.getClicks() + ", getProfits=" + estimated.getProfits());
 					gMkcp.add(query.getQuery(), bidIndex, query.bids[bidIndex], estimated.getConversions(), ((estimated.getConversions()*10)- (estimated.getClicks()*estimated.getCpc())));
 				}
 				
@@ -359,6 +362,7 @@ public class AgentSmithOptimizer extends Optimizer
 		
 		try
 		{
+			//TODO: revise path
 			new File("c:\\game_results\\" + sim_id + "_" + startTargetRoi + "_" + incRoiFactor + "_" +  incBidFactor + "_" +  incBidFactorPriority + "_" + INITIAL_BID_DEFAULT + "_" + initialDailyQuerySpentLimit + "_" + dailyQuerySpentLimit + "_" + spentLimitPriorityFactor).createNewFile();
 		} catch (IOException e)
 		{
