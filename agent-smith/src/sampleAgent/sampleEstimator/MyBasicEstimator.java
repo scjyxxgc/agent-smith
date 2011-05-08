@@ -75,8 +75,8 @@ public class MyBasicEstimator extends Estimator {
 public double LinearRegression(double[] yArr, double[] xVals, int numDays)
 {
    		
-	double sumx = 0.0;
-	double sumy = 0.0;
+	double sumx = 0.0001;
+	double sumy = 0.0001;
    	for (int i = 0; i <numDays; i++)
    	{ 
    		sumx += xVals[i];
@@ -85,10 +85,10 @@ public double LinearRegression(double[] yArr, double[] xVals, int numDays)
    	   		
    	double xbar = sumx / numDays;
    	double ybar = sumy / numDays;
-   	double xxbar = 0.0;
-   	double xybar = 0.0;
-   	double xdelta = 0.0;
-   	double ydelta = 0.0;
+   	double xxbar = 0.0001;
+   	double xybar = 0.0001;
+   	double xdelta = 0.0001;
+   	double ydelta = 0.0001;
     
    	for (int i = 0; i < numDays; i++) 
    	{
@@ -119,20 +119,20 @@ public double LinearRegression(double[] yArr, double[] xVals, int numDays)
 		 
 		for (int i=0; i<60; i++)
 		 {
-			 convRateArr[i]=0;
-			 clickRateArr[i]=0;
-			 salesArr[i]=0; 
+			 convRateArr[i]=1;
+			 clickRateArr[i]=1;
+			 salesArr[i]=1; 
 		 }
 		
 		//CHANGE1 - putting zeroes in other arrays too
 		for (int i=0; i<NUM_OF_DAYS; i++)
 		 {
-			convRateWindow[i]=0;
-			clickRateWindow[i]=0;
-			salesWindow[i]=0;
-			estConvRateWindow[i]=0;
-			estClickRateWindow[i]=0;
-			estSalesWindow[i]=0;
+			convRateWindow[i]=1;
+			clickRateWindow[i]=1;
+			salesWindow[i]=1;
+			estConvRateWindow[i]=1;
+			estClickRateWindow[i]=1;
+			estSalesWindow[i]=1;
 		 }
 				
 	}
@@ -172,8 +172,8 @@ public double LinearRegression(double[] yArr, double[] xVals, int numDays)
         	{
         		if (yday<=3)
     			    {
-    				convRateWindow[i] = 0;
-    				estConvRateWindow[i] = 0;
+    				convRateWindow[i] = 1;
+    				estConvRateWindow[i] = 1;
     			    }
     			else {
         		convRateWindow[i] = query.convRate[yday-3 + i];
@@ -206,8 +206,8 @@ public double LinearRegression(double[] yArr, double[] xVals, int numDays)
         		//if (yday<2) ?????
         		if (yday<=3)
         			{
-        				clickRateWindow[i] = 0;
-        				estClickRateWindow[i] = 0;
+        				clickRateWindow[i] = 1;
+        				estClickRateWindow[i] = 1;
         			}
         			else {
         		clickRateWindow[i] = query.clickRate[yday-3 + i];
@@ -245,8 +245,8 @@ public double LinearRegression(double[] yArr, double[] xVals, int numDays)
         	{
         		if (yday<=3)
     			{
-        			salesWindow[i] = 0;
-        			estSalesWindow[i] = 0;
+        			salesWindow[i] = 1;
+        			estSalesWindow[i] = 1;
     			}
     			else {
         		salesWindow[i] = query.sales[yday-3 + i];
