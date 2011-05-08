@@ -7,6 +7,6 @@
 	<classpathentry kind="lib" path="additionalJars/aa-logging-0.9.3.jar"/>
 	<classpathentry kind="lib" path="additionalJars/org.mortbay.jetty-4.2.27.jar"/>
 	<classpathentry kind="lib" path="additionalJars/tasim-0.8.0.4.2.jar" sourcepath="tac-aa-10.1.0.1_source"/>
-	<classpathentry kind="lib" path="C:/Documents and Settings/Ariel/Desktop/Ariel/eclipse-rcp-helios-SR2-win32/workspace/agent-smith/additionalJars/commons-math-1.2.jar"/>
+	<classpathentry kind="lib" path="additionalJars/commons-math-1.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
