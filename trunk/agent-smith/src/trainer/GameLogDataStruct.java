@@ -3,15 +3,19 @@ package trainer;
 import java.util.HashMap;
 import java.util.Map;
 
+import edu.umich.eecs.tac.props.Query;
+
 public class GameLogDataStruct
 {
 	private Map<Integer, GameReports> gamesReports;
+	private Map<Query, Double> lastBidHistory;
 
 	private static GameLogDataStruct instance = null;
 
 	private GameLogDataStruct()
 	{
 		gamesReports = new HashMap<Integer, GameReports>();
+		lastBidHistory = new HashMap<Query,Double>();
 	}
 
 	public static GameLogDataStruct getInstance()
@@ -21,6 +25,16 @@ public class GameLogDataStruct
 			instance = new GameLogDataStruct();
 		}
 		return instance;
+	}
+	
+	public void addLastBid(Query theQuery, double theBid)
+	{
+		lastBidHistory.put(theQuery, theBid);
+	}
+	
+	public double getLastBid(Query theQuery)
+	{
+		return lastBidHistory.get(theQuery);
 	}
 	
 	/**
