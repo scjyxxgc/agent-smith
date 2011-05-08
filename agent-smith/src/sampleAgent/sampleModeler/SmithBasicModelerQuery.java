@@ -32,7 +32,7 @@ public class SmithBasicModelerQuery extends AgentComponentQuery {
     protected	Double	[]	estClicks;
     
     protected ArrayList<Double> gameBids;
-	protected ArrayList<Integer> gamePos;
+	protected ArrayList<Double> gamePos;
     
 	public SmithBasicModelerQuery(Query q) {
 		super(q);
@@ -48,7 +48,7 @@ public class SmithBasicModelerQuery extends AgentComponentQuery {
 		clicks			=	new Integer[TAU_SIMDAYS+3];
 		estClicks		=	new Double[TAU_SIMDAYS+3];
 		gameBids		=	new ArrayList<Double>();
-		gamePos			=	new ArrayList<Integer>();
+		gamePos			=	new ArrayList<Double>();
 		
 		nextDay(0);
 	}
