@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="lib" path="additionalJars/aa-agent-0.9.6.2.jar"/>
+	<classpathentry kind="lib" path="additionalJars/aa-agent-0.9.6.2.jar" sourcepath="tac-aa-10.1.0.1_source"/>
 	<classpathentry kind="lib" path="additionalJars/aa-common-0.9.6.2.jar" sourcepath="tac-aa-10.1.0.1_source"/>
 	<classpathentry kind="lib" path="additionalJars/aa-logging-0.9.3.jar"/>
 	<classpathentry kind="lib" path="additionalJars/org.mortbay.jetty-4.2.27.jar"/>
