@@ -5,56 +5,51 @@ import java.util.Map;
 
 import edu.umich.eecs.tac.props.Query;
 
-public class GameLogDataStruct
-{
+public class GameLogDataStruct {
 	private Map<Integer, GameReports> gamesReports;
 	private Map<Query, Double> lastBidHistory;
 
 	private static GameLogDataStruct instance = null;
 
-	private GameLogDataStruct()
-	{
+	private GameLogDataStruct() {
 		gamesReports = new HashMap<Integer, GameReports>();
-		lastBidHistory = new HashMap<Query,Double>();
+		lastBidHistory = new HashMap<Query, Double>();
 	}
 
-	public static GameLogDataStruct getInstance()
-	{
-		if (instance == null)
-		{
+	public static GameLogDataStruct getInstance() {
+		if (instance == null) {
 			instance = new GameLogDataStruct();
 		}
 		return instance;
 	}
-	
-	public void addLastBid(Query theQuery, double theBid)
-	{
+
+	public void addLastBid(Query theQuery, double theBid) {
 		lastBidHistory.put(theQuery, theBid);
 	}
-	
-	public double getLastBid(Query theQuery)
-	{
-		return lastBidHistory.get(theQuery);
+
+	public double getLastBid(Query theQuery) {
+		if (null == lastBidHistory.get(theQuery)) {
+			return 0.0;
+		} else {
+			return lastBidHistory.get(theQuery);
+		}
 	}
-	
+
 	/**
 	 * @param gameId
 	 */
-	public void addNewGameReport(int gameId)
-	{
+	public void addNewGameReport(int gameId) {
 		gamesReports.put(gameId, new GameReports(gameId));
 	}
-	
+
 	/**
 	 * @return the gamesReports
 	 */
-	public Map<Integer, GameReports> getGamesReports()
-	{
+	public Map<Integer, GameReports> getGamesReports() {
 		return gamesReports;
 	}
 
-	public class GameReports
-	{
+	public class GameReports {
 		int gameId;
 		QueryReportLog queryReport;
 		SalesReportLog salesReport;
@@ -65,107 +60,87 @@ public class GameLogDataStruct
 		ReserveInfoReportLog reserveInfoReport;
 		PublisherInfoReportLog publisherInfoReport;
 		BankStatusReportLog bankStatusReport;
-		
-		public GameReports(int gameId)
-		{
+
+		public GameReports(int gameId) {
 			this.gameId = gameId;
 		}
-		
-		public void createQueryReport()
-		{
+
+		public void createQueryReport() {
 			queryReport = new QueryReportLog();
 		}
 
-		public QueryReportLog getQueryReport()
-		{
+		public QueryReportLog getQueryReport() {
 			return queryReport;
 		}
-		
-		public void createSalesReport()
-		{
+
+		public void createSalesReport() {
 			salesReport = new SalesReportLog();
 		}
 
-		public SalesReportLog getSalesReport()
-		{
+		public SalesReportLog getSalesReport() {
 			return salesReport;
 		}
-		
-		public void createBidBundleReport()
-		{
+
+		public void createBidBundleReport() {
 			bidBundleReport = new BidBundleReportLog();
 		}
 
-		public BidBundleReportLog getBidBundleReport()
-		{
+		public BidBundleReportLog getBidBundleReport() {
 			return bidBundleReport;
 		}
-		
-		public void createRetailCatalogReport()
-		{
+
+		public void createRetailCatalogReport() {
 			retailCatalogReport = new RetailCatalogReportLog();
 		}
 
-		public RetailCatalogReportLog getRetailCatalogReport()
-		{
+		public RetailCatalogReportLog getRetailCatalogReport() {
 			return retailCatalogReport;
 		}
-		
-		public void createSlotInfoReport()
-		{
+
+		public void createSlotInfoReport() {
 			slotInfoReport = new SlotInfoReportLog();
 		}
 
-		public SlotInfoReportLog getSlotInfoReport()
-		{
+		public SlotInfoReportLog getSlotInfoReport() {
 			return slotInfoReport;
 		}
-		
-		public void createUserClickModelReport()
-		{
+
+		public void createUserClickModelReport() {
 			userClickModelReport = new UserClickModelReportLog();
 		}
 
-		public UserClickModelReportLog getUserClickModelReport()
-		{
+		public UserClickModelReportLog getUserClickModelReport() {
 			return userClickModelReport;
 		}
-		
-		public void createReserveInfoReportLog()
-		{
+
+		public void createReserveInfoReportLog() {
 			reserveInfoReport = new ReserveInfoReportLog();
 		}
 
-		public ReserveInfoReportLog getReserveInfoReportLog()
-		{
+		public ReserveInfoReportLog getReserveInfoReportLog() {
 			return reserveInfoReport;
 		}
-		
-		public void createPublisherInfoReportLog()
-		{
+
+		public void createPublisherInfoReportLog() {
 			publisherInfoReport = new PublisherInfoReportLog();
 		}
 
-		public PublisherInfoReportLog getPublisherInfoReportLog()
-		{
+		public PublisherInfoReportLog getPublisherInfoReportLog() {
 			return publisherInfoReport;
 		}
-		
-		public void createBankStatusLog()
-		{
+
+		public void createBankStatusLog() {
 			bankStatusReport = new BankStatusReportLog();
 		}
 
-		public BankStatusReportLog getBankStatusReportLog()
-		{
+		public BankStatusReportLog getBankStatusReportLog() {
 			return bankStatusReport;
 		}
-		
+
 		/**
 		 * @return the gameId
 		 */
-		public int getGameId()
-		{
+		public int getGameId() {
 			return gameId;
 		}
 	}
