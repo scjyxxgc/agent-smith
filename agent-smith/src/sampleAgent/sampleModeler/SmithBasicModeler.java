@@ -23,6 +23,7 @@ import arch.Modeler;
 
 public class SmithBasicModeler extends Modeler {
 
+	private boolean CALC_CURR_GAME = false;
 	double decay;
 	protected static double DECAY_DEFAULT = 0.1;
 	private static final int NUM_OF_PLAYERS = 8;
@@ -170,6 +171,7 @@ public class SmithBasicModeler extends Modeler {
 		double avgPosCurr = 0.0;
 		double CURR_FACTOR = 0.0;
 		double LOG_FACTOR = 0.0;
+		boolean logExist;
 
 		//debug prints
 		//System.out.println("simID = " + simID);
@@ -177,8 +179,8 @@ public class SmithBasicModeler extends Modeler {
 
 		// if we played at least once
 		// if (joinNumber > 0)
-		if ((true  == GameLogDataStruct.getInstance().getGamesReports().containsKey(simID-1)) &&
-				(false == GameLogDataStruct.getInstance().getGamesReports().get(simID-1).getPublisherInfoReportLog().getSpecificParticipantAllPublisherInfoReport("Agent-Smith").isEmpty()))
+		logExist = GameLogDataStruct.getInstance().getGamesReports().containsKey(simID-1) & !GameLogDataStruct.getInstance().getGamesReports().get(simID-1).getPublisherInfoReportLog().getSpecificParticipantAllPublisherInfoReport("Agent-Smith").isEmpty();
+		if (true  == logExist)
 		{
 			System.out.println("modeler: Past log exists");
 			//debug prints
@@ -195,6 +197,15 @@ public class SmithBasicModeler extends Modeler {
 			daySum = day;
 			LOG_FACTOR = 0.0;
 			CURR_FACTOR = 1.0;
+		}
+		
+		if (this.CALC_CURR_GAME == false & logExist == true){
+			LOG_FACTOR = 1.0;
+			CURR_FACTOR = 0.0;
+		}
+		if (this.CALC_CURR_GAME == false & logExist == false){
+			LOG_FACTOR = 0.0;
+			CURR_FACTOR = 0.0;
 		}
 
 		avgBidPositionsByCurrGame.put(query.getQuery(), estimatePosByCurrGame(query));
@@ -228,7 +239,7 @@ public class SmithBasicModeler extends Modeler {
 			System.out.println("modeler: avgPosLog = " + avgPosLog);
 		}
 
-		if (avgBidPositionsByCurrGame.containsKey(query.getQuery()) == true){
+		if (avgBidPositionsByCurrGame.containsKey(query.getQuery()) == true & this.CALC_CURR_GAME){
 			System.out.println("modeler: printing curr game map for query: "+query.getQuery());
 			printMap(avgBidPositionsByCurrGame.get(query.getQuery()));
 			
@@ -256,7 +267,7 @@ public class SmithBasicModeler extends Modeler {
 			}
 			System.out.println("modeler: avgPosCurr = " + avgPosCurr);
 		} else{
-			System.out.println("modeler: curr game, we've been fucked up!");
+			System.out.println("not calculating curr game");
 		}
 
 		avgPos = (avgPosLog * (TAU_SIMDAYS / daySum) * LOG_FACTOR) + (avgPosCurr * day/daySum * CURR_FACTOR);
