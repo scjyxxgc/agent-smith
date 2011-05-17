@@ -1,0 +1,1 @@
+java -cp "tasim-10.1.0.1.jar;lib/*" se.sics.tasim.sim.Main
