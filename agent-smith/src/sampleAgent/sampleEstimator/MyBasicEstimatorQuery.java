@@ -19,36 +19,33 @@ public class MyBasicEstimatorQuery extends AgentComponentQuery {
 	public int 		[]	clicks;
 	public Double   [] 	profitPerUnitSold;
 	
-	/* computations arrays for DES model */
+	//computations arrays for DES model 
 	public Double 	[]	b1;
 	public Double 	[]	b2;
 	public Double 	[]	b3;
-
 	
 	/* initial defaults */
-    protected static double SALES_INIT = 50.0;
-    protected static double CONVR_INIT = 50.3;
-    protected static double CLKR_INIT = 50.3;
+    protected static double SALES_INIT = 10.0;
+    protected static double CONVR_INIT = 0.3;
+    protected static double CLKR_INIT = 0.3;
 
 	
 	public MyBasicEstimatorQuery(Query q) 
 	{
 		super(q);
-		estSales =	 	new Double[TAU_SIMDAYS];
-		estConvRate =	new Double[TAU_SIMDAYS];
-		estClickRate =  new Double[TAU_SIMDAYS];
+		estSales =	 	new Double[TAU_SIMDAYS+3];
+		estConvRate =	new Double[TAU_SIMDAYS+3];
+		estClickRate =  new Double[TAU_SIMDAYS+3];
+		sales = 		new int[TAU_SIMDAYS+3];
+		convRate = 		new Double[TAU_SIMDAYS+3];
+		clicks = 		new int[TAU_SIMDAYS+3];
+		clickRate = 	new Double[TAU_SIMDAYS+3];
+		profitPerUnitSold =	new Double[TAU_SIMDAYS+3];
 		
-		sales = 		new int[TAU_SIMDAYS];
-		convRate = 		new Double[TAU_SIMDAYS];
-		clicks = 		new int[TAU_SIMDAYS];
-		clickRate = 	new Double[TAU_SIMDAYS];
-		profitPerUnitSold =	new Double[TAU_SIMDAYS];
+		b1= new Double[TAU_SIMDAYS+3];
+		b2= new Double[TAU_SIMDAYS+3];
+		b3= new Double[TAU_SIMDAYS+3];
 		
-		b1= new Double[TAU_SIMDAYS];
-		b2= new Double[TAU_SIMDAYS];
-		b3= new Double[TAU_SIMDAYS];
-
-				
 		nextDay(0);
 	}
 	
@@ -60,6 +57,10 @@ public class MyBasicEstimatorQuery extends AgentComponentQuery {
 		estSales[day]=SALES_INIT;
 		estConvRate[day]=CONVR_INIT;
 		estClickRate[day] = CLKR_INIT;
+		
+		b1[day]=0.0;
+		b2[day]=0.0;
+		b3[day]=0.0;
 	}
 	
 }
