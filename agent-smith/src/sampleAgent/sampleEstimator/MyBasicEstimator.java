@@ -4,6 +4,7 @@ package sampleAgent.sampleEstimator;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Random;
 import java.util.Set;
 import edu.umich.eecs.tac.props.Ad;
 import edu.umich.eecs.tac.props.BidBundle;
@@ -61,13 +62,13 @@ public class MyBasicEstimator extends Estimator
 	        	if (impressions == 0) 
         				query.clickRate[yday] = 0.0;
            		else 
-           				query.clickRate[yday] = (double)(query.clicks[yday])/(double)(impressions);
+           				query.clickRate[yday] = ((double)(query.clicks[yday]))/((double)(impressions));
 
         	        
 	        	if (query.clicks[yday] == 0) 
 	        		query.convRate[yday] = 0.0;
 	        	else
-	        		query.convRate[yday] = (double)(query.sales[yday])/(double)(query.clicks[yday]);
+	        		query.convRate[yday] = ((double)(query.sales[yday]))/((double)(query.clicks[yday]));
 
         //query.estConvRate[yday+2] = decay*query.convRate[yday]+(1-decay)*query.estConvRate[yday+1];
 			/*if (yday==3){
@@ -112,8 +113,8 @@ public class MyBasicEstimator extends Estimator
         	
 
         	if (query.sales[yday]!=0)        
-				query.profitPerUnitSold[yday] = salesReport.getRevenue(query.getQuery())/query.sales[yday];        
-			else         
+				query.profitPerUnitSold[yday] = salesReport.getRevenue(query.getQuery())/((double)query.sales[yday]);        
+			else
 				query.profitPerUnitSold[yday] = 0.0;
 		}
 	}
@@ -136,6 +137,10 @@ public class MyBasicEstimator extends Estimator
 		double impressions;		
 		double clicks;		
 		double conversions;
+		//
+		double position;
+		double weight = 1.0;
+//		double weight1 = 1.0;
 			
 		for(MyBasicEstimatorQuery equery : querySpace) 
 		{      				
@@ -143,11 +148,31 @@ public class MyBasicEstimator extends Estimator
 			{
 				//System.out.println("!!!query="+query+" bid="+bid+"ad="+ad+"day="+day);
 				modelerResult = aaModeler.model(query, bid,  ad,  day);				
-
+				
 				cpc = modelerResult.getCpc();				
 				result.setCpc(cpc);
 				impressions = modelerResult.getImpressions();				
-				result.setImpressions(impressions);				
+				result.setImpressions(impressions);
+				
+				position = modelerResult.getPosition();
+				
+//				if ((position >= 2)&&(position <= 4))
+//					weight1 = 0.75;
+//				if ((position >= 5)&&(position <= 8))
+//					weight1 = 0.5;
+				
+				if (position < 1.0) {
+					position = Math.round(position);
+				}
+				
+				if (position == 0){
+					Random generator = new Random( 19580427 );
+					position = generator.nextDouble()*7.0 + 1.0;
+				}
+				
+				weight = 1.0 / position;
+				
+				System.out.println("******** ESTIMATOR - modeler results: cpc = "+cpc+" impressions = "+impressions+" pos = "+position+" weight = "+weight);
 
 				clicks = impressions*equery.estClickRate[day];
 				
@@ -160,7 +185,8 @@ public class MyBasicEstimator extends Estimator
 				conversions = clicks*equery.estConvRate[day];				
 				result.setConversions(conversions);				
 				
-				result.setProfits(conversions*equery.profitPerUnitSold[day-2] - clicks*cpc);			
+//				System.out.println("**** ESTIMATOR: conversion ="+conversions+" PPUS[yday-2] = "+equery.profitPerUnitSold[day-2]+" clicks = "+clicks+" cpc = "+cpc);
+				result.setProfits(weight*conversions*equery.profitPerUnitSold[day-2] - clicks*cpc);
 			}
 		}
 		return result;
