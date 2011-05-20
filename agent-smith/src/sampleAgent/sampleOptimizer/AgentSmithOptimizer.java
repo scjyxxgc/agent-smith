@@ -36,7 +36,7 @@ public class AgentSmithOptimizer extends Optimizer
 	 */
 	protected double INITIAL_BID_DEFAULT = 2.5;
 
-	protected double initialDailyQuerySpentLimit = 100;
+	protected double initialDailyQuerySpentLimit = 150;
 	//protected static double INITIAL_DAILY_QUERY_SPENT_LIMIT_DEFAULT = 20.0;
 	
 	protected int dailyQuerySpentLimit = 250;
@@ -47,12 +47,12 @@ public class AgentSmithOptimizer extends Optimizer
 	protected float incBidFactor = 0.10f;
 	//protected final float EQUATE_ROI_INCREASE_BID_FACTOR_DEFAULT = 1.05f;
 	
-	protected float incBidFactorPriority = 0.5f;
+	protected float incBidFactorPriority = 0.6f;
 	//protected final float EQUATE_ROI_INCREASE_PRIORITY_BID_FACTOR_DEFAULT = 1.1f;
 
 	protected float startTargetRoi = 10;
 	
-	protected float spentLimitPriorityFactor = 1.1f;
+	protected float spentLimitPriorityFactor = 1.2f;
 	
 	protected float extendCapacityFactor = 1f;
 	
@@ -204,7 +204,7 @@ public class AgentSmithOptimizer extends Optimizer
 			bidBundle.setAd(query, optquery.ad);
 			bidBundle.setDailyLimit(query, dailyQuerySpentLimit);
 			
-			bidBundle.setCampaignDailySpendLimit(dailyQuerySpentLimit*10); // TEST - TEMPORARY
+			bidBundle.setCampaignDailySpendLimit(dailyQuerySpentLimit*12); // TEST - TEMPORARY
 
 			// for log prints
 			Double dlimit = dailyQuerySpentLimit;
@@ -281,7 +281,7 @@ public class AgentSmithOptimizer extends Optimizer
 		estimatedSales = 0;
 		log.log(Level.FINE, " Query report for day " + yday);
 		
-		//long start = System.currentTimeMillis();
+		long start = System.currentTimeMillis();
 		if (yday > 0)
 		{
 			//System.out.println("***************** Before HybridPenalizedGreedyMCKP, capacity=" + CAPACITY + " window=" + CAPACITY_WINDOW);
@@ -303,7 +303,9 @@ public class AgentSmithOptimizer extends Optimizer
 				{
 					estimated = aaEstimator.estimateQuery(query.getQuery(), query.bids[bidIndex], query.ad, query.dailyLimit, yday + 2);		
 					query.setEstimates(bidIndex, estimated.getImpressions(), estimated.getCpc(), estimated.getConversions(), estimated.getClicks(), estimated.getProfits());
-					//System.out.println(query.getQuery().getManufacturer() + "_" + query.getQuery().getComponent() + ", getCpc=" + estimated.getCpc() + ", getConversions()=" + estimated.getConversions() + ", getClicks=" + estimated.getClicks() + ", getProfits=" + estimated.getProfits());
+					
+					System.out.println(query.getQuery().getManufacturer()+ "_" + query.getQuery().getComponent() + "_" + bidIndex + " - " + estimated.getImpressions() + ", " +  estimated.getCpc() + ", " +  estimated.getConversions() + ", " +  estimated.getClicks() + ", " +  estimated.getProfits());
+
 					gMkcp.add(query.getQuery(), bidIndex, query.bids[bidIndex], estimated.getConversions(), ((estimated.getConversions()*10)- (estimated.getClicks()*estimated.getCpc())));
 				}
 				
@@ -342,15 +344,15 @@ public class AgentSmithOptimizer extends Optimizer
 		
 			}
 		}
-		//long stop = System.currentTimeMillis();
-		//System.out.println("***** Total run time for optimizer (in milis) = " + (stop-start));
+		long stop = System.currentTimeMillis();
+		System.out.println("***** OPTIMIZER: Total run time for optimizer (in milis) = " + (stop-start));
 	}
 
 	public void simulationFinished()
 	{
 		querySpace.clear();
 		salesWindow.clear();
-		
+	/*	
 		String[] arguments = new String[] {"-handler", "trainer.GameLogHandler", "-file", "..\\..\\..\\aa-server-10.1.0.1\\sim" + sim_id + ".slg"};
         try
 		{
@@ -370,6 +372,7 @@ public class AgentSmithOptimizer extends Optimizer
 		}
 		
 		GameLogDataStruct.getInstance().getGamesReports().clear();
+		*/
 	}
 
 	public void simulationSetup()
