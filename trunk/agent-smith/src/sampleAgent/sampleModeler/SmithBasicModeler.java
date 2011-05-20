@@ -27,7 +27,7 @@ import arch.Modeler;
 
 public class SmithBasicModeler extends Modeler {
 
-	private boolean CALC_CURR_GAME = false;
+	private boolean CALC_CURR_GAME = true;
 	double decay;
 	protected static double DECAY_DEFAULT = 0.1;
 	private static final int NUM_OF_PLAYERS = 8;
@@ -214,7 +214,7 @@ public class SmithBasicModeler extends Modeler {
 		
 		if (true  == logExist)
 		{
-			System.out.println("modeler: Past log exists");
+//			System.out.println("modeler: Past log exists");
 			//debug prints
 			//System.out.println("GameLogDataStruct.getInstance().getGamesReports().get("+(simID-1)+").getPublisherInfoReportLog().getSpecificParticipantAllPublisherInfoReport(\"Agent-Smith\").isEmpty() = "+GameLogDataStruct.getInstance().getGamesReports().get(simID-1).getPublisherInfoReportLog().getSpecificParticipantAllPublisherInfoReport("Agent-Smith").isEmpty());
 			//System.out.println("\nUsing data from log of game number " + (simID-1));
@@ -248,10 +248,10 @@ public class SmithBasicModeler extends Modeler {
 		}
 
 		if (avgBidPositionsByLog.containsKey(query.getQuery()) == true){
-			System.out.println("modeler: printing local map for query: "+query.getQuery());
+//			System.out.println("modeler: printing local map for query: "+query.getQuery());
 			
 			localMap.putAll(avgBidPositionsByLog.get(query.getQuery()));
-			printMap(localMap);
+//			printMap(localMap);
 			double tmpLowLog = 0.0;
 			double tmpHighLog = 0.0;
 //			System.out.println("local map size: " + localMap.size());
@@ -279,10 +279,10 @@ public class SmithBasicModeler extends Modeler {
 		}
 
 		if (this.CALC_CURR_GAME && avgBidPositionsByCurrGame.containsKey(query.getQuery()) == true){
-//			System.out.println("modeler: printing curr game map for query: "+query.getQuery());
-//			printMap(avgBidPositionsByCurrGame.get(query.getQuery()));
+			System.out.println("modeler: printing curr game map for query: "+query.getQuery());
 			
 			localMap.putAll(avgBidPositionsByCurrGame.get(query.getQuery()));
+			printMap(localMap);
 			double tmpLowCurr = 0.0;
 			double tmpHighCurr = 0.0;
 			for (int index = 0; index < localMap.size(); index++){
@@ -294,28 +294,26 @@ public class SmithBasicModeler extends Modeler {
 					catch (ArrayIndexOutOfBoundsException e){
 						tmpHighCurr = tmpLowCurr;
 					}
+					break;
 				}
 			}
 
-//			System.out.println("modeler: tmpLowCurr = " + tmpLowCurr + ", tmpHighCurr = " + tmpHighCurr);
+			System.out.println("modeler: bid was: " + bid + " tmpLowCurr = " + tmpLowCurr + ", tmpHighCurr = " + tmpHighCurr);
 			if (Math.abs(bid - tmpLowCurr) <= Math.abs(tmpHighCurr - bid)){
 				avgPosCurr = localMap.get(tmpLowCurr);
 			}
 			else {
 				avgPosCurr = localMap.get(tmpHighCurr);
 			}
-//			System.out.println("modeler: avgPosCurr = " + avgPosCurr);
-		} else{
-			System.out.println("not calculating curr game");
-		}
+		} 
 
 		double logPrec = ((double)TAU_SIMDAYS) / ((double)daySum);
 		double currPrec = ((double)day) / ((double)daySum);
 		avgPos = (avgPosLog * logPrec * LOG_FACTOR) + (avgPosCurr * currPrec * CURR_FACTOR);
-//		System.out.println("printing mult factors for log avg pos. avg pos log: " + avgPosLog + " TAU_SIMDAYS/daySum: " + logPrec + " LOG_FACTOR: " + LOG_FACTOR);
-//		System.out.println("returning avg pos after factoring and math to model: "+avgPos);
+		System.out.println("printing mult factors for log avg pos. avg pos log: " + avgPosLog + " log precentage: " + logPrec + " LOG_FACTOR: " + LOG_FACTOR);
+		System.out.println("printing mult factors for curr avg pos. avg pos curr: " + avgPosCurr + " curr precentage: " + currPrec + " CURR_FACTOR: " + CURR_FACTOR);
+		System.out.println("returning avg pos after factoring and math to model: "+avgPos);
 		return avgPos;
-
 	}
 
 	private LogQueryType convertToQueryLogType(Query query) {
