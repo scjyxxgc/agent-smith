@@ -235,10 +235,10 @@ public class GameLogParser extends Parser
 		} 
 		else if ((content instanceof SimulationStatus) || (content instanceof StartInfo))
 		{		
-			System.out.println(day + ": " + participantNames[sender] + "->" + participantNames[receiver] + "," + content.toString());
+	//		System.out.println(day + ": " + participantNames[sender] + "->" + participantNames[receiver] + "," + content.toString());
 		}else
 		{
-			System.out.println(day + ": " + "*** " + participantNames[sender] + "->" + participantNames[receiver] + "," + "Unhndeled: " + content.getClass());
+	//		System.out.println(day + ": " + "*** " + participantNames[sender] + "->" + participantNames[receiver] + "," + "Unhndeled: " + content.getClass());
 		}
 	}
 
