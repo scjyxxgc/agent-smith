@@ -36,6 +36,7 @@ public class GameLogHandler extends LogHandler
 		parser.start();
 		parser.stop();
 
+		/*
 		int gameId = reader.getSimulationID();
 		
 		System.out.println("\n*************************  General  ***************************");
@@ -128,6 +129,7 @@ public class GameLogHandler extends LogHandler
 		{
 			System.out.println(publisherInfoResults[i]);
 		}		
+		*/
 	}
 
 }
