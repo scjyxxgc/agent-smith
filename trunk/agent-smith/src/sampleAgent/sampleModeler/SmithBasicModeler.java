@@ -1,16 +1,20 @@
 package sampleAgent.sampleModeler;
 
+import java.awt.print.Printable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Random;
 import java.util.Set;
 
+import trainer.Constants.LogQueryReportParams;
 import trainer.GameLogDataStruct;
 import trainer.Constants.LogBidBundleReportParams;
 import trainer.Constants.LogQueryType;
+import trainer.Constants.LogSalesReportParams;
 import trainer.Constants.LogSlotInfoReportParams;
 
 import static arch.AgentConstants.TAU_SIMDAYS;
@@ -28,23 +32,20 @@ public class SmithBasicModeler extends Modeler {
 	protected static double DECAY_DEFAULT = 0.1;
 	private static final int NUM_OF_PLAYERS = 8;
 	private int simID = 0;
-	private boolean logExist = false;
 
 	protected Queue<SmithBasicModelerQuery> querySpace;
 	protected HashMap<Query, HashMap<Double, Integer>> avgBidPositionsByLog;
 	protected HashMap<Query, HashMap<Double, Integer>> avgBidPositionsByCurrGame;
+	
+	//for debug use: using random pos on first game
+	private Random generator = new Random( 19580427 );
+	private double ranPos;
 
 	public void simulationReady() {
 		Set<Query> querySet = aaAgent.getQuerySet();
 		simID = this.aaAgent.getStartInfo().getSimulationID();
-		if (GameLogDataStruct.getInstance().getGamesReports().containsKey(simID-1) == true && GameLogDataStruct.getInstance().getGamesReports().get(simID-1).getPublisherInfoReportLog().getSpecificParticipantAllPublisherInfoReport("Agent-Smith").isEmpty() == false){
-			logExist = true;
-		}
 		for(Query query : querySet) { 
 			querySpace.add(new SmithBasicModelerQuery(query));
-			if (logExist == true && avgBidPositionsByLog.containsKey(query) == false){
-				avgBidPositionsByLog.put(query, estimatePosByLog(simID-1, convertToQueryLogType(query)));
-			}
 		}
 	}
 
@@ -62,7 +63,7 @@ public class SmithBasicModeler extends Modeler {
 	}
 
 	public void handleQueryReport(QueryReport queryReport, int yday) {
-		for(SmithBasicModelerQuery query : querySpace) {
+		for(SmithBasicModelerQuery query : querySpace) {      	
 			query.cpc[yday] = queryReport.getCPC(query.getQuery());
 			query.impressions[yday] = queryReport.getImpressions(query.getQuery());
 
@@ -95,37 +96,56 @@ public class SmithBasicModeler extends Modeler {
 
 	public HashMap<Double, Integer> estimatePosByLog (int gameId, LogQueryType qt) {
 		String[] strBidResults;
-		String[] strSlotInfoResults;
+		String[] strPosInfoResults;
 
 		ArrayList<Double>  bidResults;
-		ArrayList<Double> slotInfoResults;
+		ArrayList<Double> posInfoResults;
 
-		if (null != GameLogDataStruct.getInstance().getGamesReports().get(gameId)){
-			strBidResults		= GameLogDataStruct.getInstance().getGamesReports().get(gameId).getBidBundleReport().getSpecificParticipantAllBidBundleReport("Agent-Smith").get(qt).get(LogBidBundleReportParams.bid);
-			strSlotInfoResults	= GameLogDataStruct.getInstance().getGamesReports().get(gameId).getSlotInfoReport().getSpecificParticipantAllSlotInfoReport("Agent-Smith").get(LogSlotInfoReportParams.regularSlots);
-		} else {
-			strBidResults		= new String[0];
-			strSlotInfoResults	= new String[0];
-		}
 
+		strBidResults		= GameLogDataStruct.getInstance().getGamesReports().get(gameId).getBidBundleReport().getSpecificParticipantAllBidBundleReport("Agent-Smith").get(qt).get(LogBidBundleReportParams.bid);
+		strPosInfoResults	= GameLogDataStruct.getInstance().getGamesReports().get(gameId).getQueryReport().getSpecificParticipantAllQueryReport("Agent-Smith").get(qt).get(LogQueryReportParams.position);
+		
 		bidResults 		= new ArrayList<Double>(strBidResults.length);
-		slotInfoResults = new ArrayList<Double>(strSlotInfoResults.length);
+		posInfoResults = new ArrayList<Double>(strPosInfoResults.length);
 
-		for (int i = 0; i < bidResults.size(); i++)
+		for (int i = 2; i < strPosInfoResults.length; i++)
 		{
-			if (null != strSlotInfoResults[i]){
-				slotInfoResults.add(i,Double.parseDouble(strSlotInfoResults[i]));
-			} else {
-				slotInfoResults.add(i, Math.ceil(NUM_OF_PLAYERS / 2));
-			}
-
-			if (null != strBidResults[i]){
-				bidResults.add(i, Double.parseDouble(strBidResults[i]));
-			} else {
-				bidResults.add(i, 3.0);
+			try
+			{
+//				System.out.println("inserting: "+strPosInfoResults[i]);
+				posInfoResults.add(Double.parseDouble(strPosInfoResults[i]));
+			}catch (Exception e) {
+//				System.out.println("caught exception, inserting 0.0");
+				posInfoResults.add(0.0);
 			}
 		}
-		return avgBidPosCalc(bidResults, slotInfoResults);
+		for (int i = 0; i < strBidResults.length-2; i++){
+			try
+			{
+//				System.out.println("inserting: "+strBidResults[i]);
+				bidResults.add(Double.parseDouble(strBidResults[i]));
+			}catch (Exception e) {
+//				System.out.println("caught exception, inserting 0.0");
+				bidResults.add(0.0);
+			}			
+		}
+		
+		//debug
+//		System.out.println("printing new pos results. size is: " + posInfoResults.size());
+//		for (int i = 0; i < posInfoResults.size(); i++) {
+//			System.out.print(posInfoResults.get(i)+ " ");
+//		}
+//		System.out.println();
+//		System.out.println("printing new bid results. size is: " + bidResults.size());
+//		for (int i = 0; i < bidResults.size(); i++) {
+//			System.out.print(bidResults.get(i)+ " ");
+//		}
+//		System.out.println();
+		
+		HashMap<Double, Integer> tmpMap = avgBidPosCalc(bidResults, posInfoResults);
+//		System.out.println("printing avg map after avgBidPosCalc");
+//		printMap(tmpMap);
+		return tmpMap;
 	}
 
 	public HashMap<Double, Integer> estimatePosByCurrGame (SmithBasicModelerQuery query){
@@ -148,7 +168,7 @@ public class SmithBasicModeler extends Modeler {
 
 		for (int i = 0; i < bidResults.size(); i++)
 		{
-			pos = Math.round(slotInfoResults.get(i).intValue());
+			pos = (int)Math.round(slotInfoResults.get(i));
 			bid = bidResults.get(i);
 			posBidArray[pos].add(bid);
 		}
@@ -178,18 +198,29 @@ public class SmithBasicModeler extends Modeler {
 		double avgPosCurr = 0.0;
 		double CURR_FACTOR = 0.0;
 		double LOG_FACTOR = 0.0;
+		boolean logExist=false;
 
 		//debug prints
 		//System.out.println("simID = " + simID);
 		//System.out.println("GameLogDataStruct.getInstance().getGamesReports().containsKey("+(simID-1)+") = "+GameLogDataStruct.getInstance().getGamesReports().containsKey(simID));
 
 		// if we played at least once
+		// if (joinNumber > 0)
+		if (GameLogDataStruct.getInstance().getGamesReports().containsKey(simID-1) == true && 
+				GameLogDataStruct.getInstance().getGamesReports().get(simID-1).getPublisherInfoReportLog().getSpecificParticipantAllPublisherInfoReport("Agent-Smith").isEmpty() == false)
+				{
+					logExist = true;
+				}
+		
 		if (true  == logExist)
 		{
-//			System.out.println("modeler: Past log exists");
+			System.out.println("modeler: Past log exists");
 			//debug prints
 			//System.out.println("GameLogDataStruct.getInstance().getGamesReports().get("+(simID-1)+").getPublisherInfoReportLog().getSpecificParticipantAllPublisherInfoReport(\"Agent-Smith\").isEmpty() = "+GameLogDataStruct.getInstance().getGamesReports().get(simID-1).getPublisherInfoReportLog().getSpecificParticipantAllPublisherInfoReport("Agent-Smith").isEmpty());
 			//System.out.println("\nUsing data from log of game number " + (simID-1));
+			if (avgBidPositionsByLog.containsKey(query.getQuery()) == false){
+				avgBidPositionsByLog.put(query.getQuery(), estimatePosByLog(simID-1, convertToQueryLogType(query.getQuery())));
+			}
 			daySum = TAU_SIMDAYS + day;
 			LOG_FACTOR = 0.5;
 			CURR_FACTOR = 0.5;
@@ -207,21 +238,23 @@ public class SmithBasicModeler extends Modeler {
 		if (this.CALC_CURR_GAME == false && logExist == false){
 			LOG_FACTOR = 0.0;
 			CURR_FACTOR = 0.0;
+			//for debug: on first game we will "spray" the position
+			ranPos = generator.nextDouble();
+			return ranPos * 7.0 + 1.0;
 		}
-		if (this.CALC_CURR_GAME)
-		{
-			//TODO: calc at day start for each query not for each bid!
+
+		if (this.CALC_CURR_GAME){
 			avgBidPositionsByCurrGame.put(query.getQuery(), estimatePosByCurrGame(query));
 		}
 
 		if (avgBidPositionsByLog.containsKey(query.getQuery()) == true){
-//			System.out.println("modeler: printing log map for query: "+query.getQuery());
-//			printMap(avgBidPositionsByLog.get(query.getQuery()));
+			System.out.println("modeler: printing local map for query: "+query.getQuery());
 			
-			//performance: if decrease -> try not using localMap. 
 			localMap.putAll(avgBidPositionsByLog.get(query.getQuery()));
+			printMap(localMap);
 			double tmpLowLog = 0.0;
 			double tmpHighLog = 0.0;
+//			System.out.println("local map size: " + localMap.size());
 			for (int index = 0; index < localMap.size(); index++){
 				if (bid >= (Double)localMap.keySet().toArray()[index]){
 					tmpLowLog = (Double)localMap.keySet().toArray()[index];
@@ -231,6 +264,7 @@ public class SmithBasicModeler extends Modeler {
 					catch (ArrayIndexOutOfBoundsException e){
 						tmpHighLog = tmpLowLog;
 					}
+					break;
 				}
 			}
 
@@ -240,7 +274,8 @@ public class SmithBasicModeler extends Modeler {
 			else {
 				avgPosLog = localMap.get(tmpHighLog);
 			}
-//			System.out.println("modeler: avgPosLog = " + avgPosLog);
+//			System.out.println("printing data from log, for query: " + query.getQuery());
+//			System.out.println("bid was: " + bid + " tmp low is: " + tmpLowLog + " tmp high is: " + tmpHighLog);
 		}
 
 		if (this.CALC_CURR_GAME && avgBidPositionsByCurrGame.containsKey(query.getQuery()) == true){
@@ -271,11 +306,14 @@ public class SmithBasicModeler extends Modeler {
 			}
 //			System.out.println("modeler: avgPosCurr = " + avgPosCurr);
 		} else{
-//			System.out.println("modeler: not calculating curr game");
+			System.out.println("not calculating curr game");
 		}
 
-		avgPos = (avgPosLog * (TAU_SIMDAYS / daySum) * LOG_FACTOR) + (avgPosCurr * day/daySum * CURR_FACTOR);
-//		System.out.println("modeler: avgPos = " + avgPos);
+		double logPrec = ((double)TAU_SIMDAYS) / ((double)daySum);
+		double currPrec = ((double)day) / ((double)daySum);
+		avgPos = (avgPosLog * logPrec * LOG_FACTOR) + (avgPosCurr * currPrec * CURR_FACTOR);
+//		System.out.println("printing mult factors for log avg pos. avg pos log: " + avgPosLog + " TAU_SIMDAYS/daySum: " + logPrec + " LOG_FACTOR: " + LOG_FACTOR);
+//		System.out.println("returning avg pos after factoring and math to model: "+avgPos);
 		return avgPos;
 
 	}
@@ -334,13 +372,10 @@ public class SmithBasicModeler extends Modeler {
 			query.setRevenue(yday, rev);
 		}
 	}
-	
-private static int counter = 1;
-private static int modelEntryDebugCounter = 0;
+
 	public ModelerResult model(Query query, double bid, Ad ad, int day) {
 		ModelerResult result = new ModelerResult(0.0,0.0,0.0);
-		
-//		System.out.println("modeler: entered model(), bid = " + bid + ", counter = " +counter);
+
 		for(SmithBasicModelerQuery mquery : querySpace) {      	
 			if (mquery.getQuery().equals(query)) {
 				result.setImpressions(mquery.estImpressions[day]);
@@ -348,11 +383,9 @@ private static int modelEntryDebugCounter = 0;
 				
 				double tmp = getEstimatedPosByBid(mquery, bid, day);
 				result.setPosition(tmp);
-//				System.out.println("modeler: modeler results position is: " + tmp);
+				System.out.println("modeler: modeler results position to model method is: " + tmp);
 			}
 		}
-//		System.out.println("modeler: exiting model(), bid = " + bid + ", counter = " +counter);
-//		counter++;
 		return result;
 	}
 
