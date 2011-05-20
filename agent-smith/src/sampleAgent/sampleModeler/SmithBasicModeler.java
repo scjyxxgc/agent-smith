@@ -2,15 +2,12 @@ package sampleAgent.sampleModeler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.TreeMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Random;
 import java.util.Set;
-import java.util.TreeMap;
 
 import trainer.Constants.LogQueryReportParams;
 import trainer.GameLogDataStruct;
@@ -30,17 +27,14 @@ public class SmithBasicModeler extends Modeler {
 	private boolean CALC_CURR_GAME = true;
 	double decay;
 	protected static double DECAY_DEFAULT = 0.1;
-	private static final int NUM_OF_PLAYERS = 8;
 	private int simID = 0;
 
 	protected Queue<SmithBasicModelerQuery> querySpace;
 	protected HashMap<Query, TreeMap<Double, Double>> avgBidPositionsByLog;
+	protected HashMap<Query, TreeMap<Double, Double>> avgBidImpByLog;
+	protected HashMap<Query, TreeMap<Double, Double>> avgBidCpcByLog;
 	protected HashMap<Query, TreeMap<Double, Double>> avgBidPositionsByCurrGame;
 	
-	//for debug use: using random pos on first game
-	private Random generator = new Random( 19580427 );
-	private double ranPos;
-
 	public void simulationReady() {
 		Set<Query> querySet = aaAgent.getQuerySet();
 		simID = this.aaAgent.getStartInfo().getSimulationID();
@@ -59,6 +53,8 @@ public class SmithBasicModeler extends Modeler {
 	public SmithBasicModeler() {
 		querySpace = new LinkedList<SmithBasicModelerQuery>();
 		avgBidPositionsByLog = new HashMap<Query, TreeMap<Double,Double>>();
+		avgBidImpByLog = new HashMap<Query, TreeMap<Double,Double>>();
+		avgBidCpcByLog = new HashMap<Query, TreeMap<Double,Double>>();
 		avgBidPositionsByCurrGame = new HashMap<Query, TreeMap<Double,Double>>();
 	}
 
@@ -126,7 +122,7 @@ public class SmithBasicModeler extends Modeler {
 		return tmpMap;
 	}
 	
-	private TreeMap<Double, Double> estimateIMPByLog (int gameId, LogQueryType qt) {
+	private TreeMap<Double, Double> estimateImpByLog (int gameId, LogQueryType qt) {
 		String[] strBidResults;
 		String[] strImpResults;
 
@@ -162,7 +158,7 @@ public class SmithBasicModeler extends Modeler {
 		return tmpMap;
 	}
 	
-	private TreeMap<Double, Double> estimateCPCByLog (int gameId, LogQueryType qt) {
+	private TreeMap<Double, Double> estimateCpcByLog (int gameId, LogQueryType qt) {
 		String[] strBidResults;
 		String[] strCpcResults;
 
@@ -278,15 +274,18 @@ public class SmithBasicModeler extends Modeler {
 		return avg;
 	}
 
-	public double getEstimatedPosByBid(SmithBasicModelerQuery query, double bid, int day){
+	public HashMap<String, Double> getEstimatedByBid(SmithBasicModelerQuery query, double bid, int day){
 		TreeMap<Double, Double> localMap = new TreeMap<Double, Double>();
 		int daySum = 0;
 		double avgPos = 0.0;
 		double avgPosLog = 0.0;
+		double avgImpLog = query.estImpressions[day];
+		double avgCpcLog = query.estImpressions[day];
 		double avgPosCurr = 0.0;
 		double CURR_FACTOR = 0.0;
 		double LOG_FACTOR = 0.0;
 		boolean logExist=false;
+		HashMap<String, Double> retMap = new HashMap<String, Double>();
 
 		if (GameLogDataStruct.getInstance().getGamesReports().containsKey(simID-1) == true && 
 				GameLogDataStruct.getInstance().getGamesReports().get(simID-1).getPublisherInfoReportLog().getSpecificParticipantAllPublisherInfoReport("Agent-Smith").isEmpty() == false)
@@ -296,12 +295,24 @@ public class SmithBasicModeler extends Modeler {
 		
 		if (true  == logExist)
 		{
-			if (avgBidPositionsByLog.containsKey(query.getQuery()) == false){
-				avgBidPositionsByLog.put(query.getQuery(), estimatePosByLog(simID-1, convertToQueryLogType(query.getQuery())));
-			}
 			daySum = TAU_SIMDAYS + day;
 			LOG_FACTOR = 0.5;
 			CURR_FACTOR = 0.5;
+			if (avgBidImpByLog.containsKey(query.getQuery()) == false){
+				avgBidImpByLog.put(query.getQuery(), estimateImpByLog(simID-1, convertToQueryLogType(query.getQuery())));
+			}
+			avgImpLog = evalMedFromMap(bid, avgBidImpByLog.get(query.getQuery()));
+
+			if (avgBidCpcByLog.containsKey(query.getQuery()) == false){
+				avgBidCpcByLog.put(query.getQuery(), estimateCpcByLog(simID-1, convertToQueryLogType(query.getQuery())));
+			}
+			avgCpcLog = evalMedFromMap(bid, avgBidCpcByLog.get(query.getQuery()));
+			
+			if (avgBidPositionsByLog.containsKey(query.getQuery()) == false){
+				avgBidPositionsByLog.put(query.getQuery(), estimatePosByLog(simID-1, convertToQueryLogType(query.getQuery())));
+			}
+			avgPosLog = evalMedFromMap(bid, avgBidPositionsByLog.get(query.getQuery()));
+		
 		} else {
 			daySum = day;
 			LOG_FACTOR = 0.0;
@@ -315,18 +326,10 @@ public class SmithBasicModeler extends Modeler {
 		if (this.CALC_CURR_GAME == false && logExist == false){
 			LOG_FACTOR = 0.0;
 			CURR_FACTOR = 0.0;
-			ranPos = generator.nextDouble();
-			return ranPos * 7.0 + 1.0;
 		}
 
 		if (this.CALC_CURR_GAME){
 			avgBidPositionsByCurrGame.put(query.getQuery(), estimatePosByCurrGame(query));
-		}
-
-		if (avgBidPositionsByLog.containsKey(query.getQuery()) == true){
-			
-			localMap.putAll(avgBidPositionsByLog.get(query.getQuery()));
-			avgPosLog = evalMedFromMap(bid, localMap);
 		}
 
 		if (this.CALC_CURR_GAME && avgBidPositionsByCurrGame.containsKey(query.getQuery()) == true){
@@ -337,10 +340,12 @@ public class SmithBasicModeler extends Modeler {
 		double logPrec = ((double)TAU_SIMDAYS) / ((double)daySum);
 		double currPrec = ((double)day) / ((double)daySum);
 		avgPos = (avgPosLog * logPrec * LOG_FACTOR) + (avgPosCurr * currPrec * CURR_FACTOR);
-		System.out.println("printing mult factors for log avg pos. avg pos log: " + avgPosLog + " log precentage: " + logPrec + " LOG_FACTOR: " + LOG_FACTOR);
-		System.out.println("printing mult factors for curr avg pos. avg pos curr: " + avgPosCurr + " curr precentage: " + currPrec + " CURR_FACTOR: " + CURR_FACTOR);
-		System.out.println("returning avg pos after factoring and math to model: "+avgPos);
-		return avgPos;
+		
+		retMap.put("Impressions", avgImpLog);
+		retMap.put("Position", avgPosLog);
+		retMap.put("cpc", avgCpcLog);
+		
+		return retMap;
 	}
 
 	private double evalMedFromMap(double val, TreeMap<Double, Double> localMap) {
@@ -433,14 +438,14 @@ public class SmithBasicModeler extends Modeler {
 
 	public ModelerResult model(Query query, double bid, Ad ad, int day) {
 		ModelerResult result = new ModelerResult(0.0,0.0,0.0);
+		HashMap<String, Double> modelMap = new HashMap<String, Double>();
 
 		for(SmithBasicModelerQuery mquery : querySpace) {      	
 			if (mquery.getQuery().equals(query)) {
-				result.setImpressions(mquery.estImpressions[day]);
-				result.setCpc(mquery.estCpc[day]);
-				
-				double tmp = getEstimatedPosByBid(mquery, bid, day);
-				result.setPosition(tmp);
+				modelMap = getEstimatedByBid(mquery, bid, day);
+				result.setPosition(modelMap.get("Position"));
+				result.setCpc(modelMap.get("cpc"));
+				result.setImpressions(modelMap.get("Impressions"));
 			}
 		}
 		return result;
