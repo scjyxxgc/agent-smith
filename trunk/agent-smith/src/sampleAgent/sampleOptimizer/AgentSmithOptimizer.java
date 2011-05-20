@@ -306,7 +306,8 @@ public class AgentSmithOptimizer extends Optimizer
 					
 					System.out.println(query.getQuery().getManufacturer()+ "_" + query.getQuery().getComponent() + "_" + bidIndex + " - " + estimated.getImpressions() + ", " +  estimated.getCpc() + ", " +  estimated.getConversions() + ", " +  estimated.getClicks() + ", " +  estimated.getProfits());
 
-					gMkcp.add(query.getQuery(), bidIndex, query.bids[bidIndex], estimated.getConversions(), ((estimated.getConversions()*10)- (estimated.getClicks()*estimated.getCpc())));
+					//gMkcp.add(query.getQuery(), bidIndex, query.bids[bidIndex], estimated.getConversions(), ((estimated.getConversions()*10)- (estimated.getClicks()*estimated.getCpc())));
+					gMkcp.add(query.getQuery(), bidIndex, query.bids[bidIndex], estimated.getConversions(), estimated.getProfits());
 				}
 				
 				equateRoiInstance.add(query.getQuery(), query.yesterdayConversions, query.yesterdayClicks, isPriorityManufacturer, isPriorityComponent, query.yesterdayPosition, query.yesterdayImpressions, yday);
