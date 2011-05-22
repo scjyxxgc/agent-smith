@@ -28,6 +28,7 @@ public class SmithBasicModeler extends Modeler {
 	double decay;
 	protected static double DECAY_DEFAULT = 0.1;
 	private int simID = 0;
+	boolean logExist = false;
 
 	protected Queue<SmithBasicModelerQuery> querySpace;
 	protected HashMap<Query, TreeMap<Double, Double>> avgBidPositionsByLog;
@@ -64,7 +65,7 @@ public class SmithBasicModeler extends Modeler {
 			query.impressions[yday] = queryReport.getImpressions(query.getQuery());
 
 			/* update estimates */
-			if (!query.cpc[yday].isNaN()) 
+			if (!query.cpc[yday].isNaN())
 				query.estCpc[yday+2] = decay*query.cpc[yday] + (1-decay)*query.estCpc[yday+1];
 			else
 				query.estCpc[yday+2] = query.estCpc[yday+1];
@@ -275,7 +276,6 @@ public class SmithBasicModeler extends Modeler {
 	}
 
 	public HashMap<String, Double> getEstimatedByBid(SmithBasicModelerQuery query, double bid, int day){
-		TreeMap<Double, Double> localMap = new TreeMap<Double, Double>();
 		int daySum = 0;
 		double avgPos = 0.0;
 		double avgPosLog = 0.0;
@@ -284,16 +284,18 @@ public class SmithBasicModeler extends Modeler {
 		double avgPosCurr = 0.0;
 		double CURR_FACTOR = 0.0;
 		double LOG_FACTOR = 0.0;
-		boolean logExist=false;
 		HashMap<String, Double> retMap = new HashMap<String, Double>();
-
 		if (GameLogDataStruct.getInstance().getGamesReports().containsKey(simID-1) == true && 
-				GameLogDataStruct.getInstance().getGamesReports().get(simID-1).getPublisherInfoReportLog().getSpecificParticipantAllPublisherInfoReport("Agent-Smith").isEmpty() == false)
-				{
-					logExist = true;
-				}
+			GameLogDataStruct.getInstance().getGamesReports().get(simID-1).getPublisherInfoReportLog().getSpecificParticipantAllPublisherInfoReport("Agent-Smith").isEmpty() == false)
+		{
+			logExist = true;
+//			System.out.println("modeler: log exists");
+		} else {
+			logExist = false;
+//			System.out.println("modeler: log NOT exists");
+		}
 		
-		if (true  == logExist)
+		if (true == logExist)
 		{
 			daySum = TAU_SIMDAYS + day;
 			LOG_FACTOR = 0.5;
@@ -301,17 +303,25 @@ public class SmithBasicModeler extends Modeler {
 			if (avgBidImpByLog.containsKey(query.getQuery()) == false){
 				avgBidImpByLog.put(query.getQuery(), estimateImpByLog(simID-1, convertToQueryLogType(query.getQuery())));
 			}
+			System.out.println("modeler: ImpByLog map");
+			printMap(avgBidImpByLog.get(query.getQuery()));
 			avgImpLog = evalMedFromMap(bid, avgBidImpByLog.get(query.getQuery()));
 
 			if (avgBidCpcByLog.containsKey(query.getQuery()) == false){
 				avgBidCpcByLog.put(query.getQuery(), estimateCpcByLog(simID-1, convertToQueryLogType(query.getQuery())));
 			}
+			System.out.println("modeler: CpcByLog map");
+			printMap(avgBidCpcByLog.get(query.getQuery()));
 			avgCpcLog = evalMedFromMap(bid, avgBidCpcByLog.get(query.getQuery()));
 			
 			if (avgBidPositionsByLog.containsKey(query.getQuery()) == false){
 				avgBidPositionsByLog.put(query.getQuery(), estimatePosByLog(simID-1, convertToQueryLogType(query.getQuery())));
 			}
+			System.out.println("modeler: PosByLog");
+			printMap(avgBidPositionsByLog.get(query.getQuery()));
 			avgPosLog = evalMedFromMap(bid, avgBidPositionsByLog.get(query.getQuery()));
+			
+			System.out.println("modeler: avgImpLog="+avgImpLog+" avgCpcLog="+avgCpcLog+" avgPosLog="+avgPosLog);
 		
 		} else {
 			daySum = day;
@@ -330,11 +340,12 @@ public class SmithBasicModeler extends Modeler {
 
 		if (this.CALC_CURR_GAME){
 			avgBidPositionsByCurrGame.put(query.getQuery(), estimatePosByCurrGame(query));
+			//TODO: insert avgBidImpressionsByCurrGame
+			//TODO: insert avgBidCpcByCurrGame
 		}
 
 		if (this.CALC_CURR_GAME && avgBidPositionsByCurrGame.containsKey(query.getQuery()) == true){
-			localMap.putAll(avgBidPositionsByCurrGame.get(query.getQuery()));
-			avgPosCurr = evalMedFromMap(bid, localMap);
+			avgPosCurr = evalMedFromMap(bid, avgBidPositionsByCurrGame.get(query.getQuery()));
 		} 
 
 		double logPrec = ((double)TAU_SIMDAYS) / ((double)daySum);
@@ -342,31 +353,33 @@ public class SmithBasicModeler extends Modeler {
 		avgPos = (avgPosLog * logPrec * LOG_FACTOR) + (avgPosCurr * currPrec * CURR_FACTOR);
 		
 		retMap.put("Impressions", avgImpLog);
-		retMap.put("Position", avgPosLog);
+		retMap.put("Position", avgPos);
 		retMap.put("cpc", avgCpcLog);
 		
 		return retMap;
 	}
 
 	private double evalMedFromMap(double val, TreeMap<Double, Double> localMap) {
+		double tmpLow = (Double)localMap.keySet().toArray()[0];
+		double tmpHigh = (Double)localMap.keySet().toArray()[localMap.keySet().size()-1];
 		double med = 0.0;
-		double tmpLow = 0.0;
-		double tmpHigh = 0.0;
 		
-		Double minLowInMap = (Double)localMap.keySet().toArray()[0];
-		
-		if (val < minLowInMap){
-			return localMap.get(minLowInMap);
+		if (val < tmpLow){
+			return localMap.get(tmpLow);
 		}
-				
+		
+		if (val > tmpHigh){
+			return localMap.get(tmpHigh);
+		}
+		
 		for (int index = 0; index < localMap.size(); index++){
-			if (val >= (Double)localMap.keySet().toArray()[index]){
-				tmpLow = (Double)localMap.keySet().toArray()[index];
+			if (val <= (Double)localMap.keySet().toArray()[index]){
+				tmpHigh = (Double)localMap.keySet().toArray()[index];
 				try {
-					tmpHigh = (Double)localMap.keySet().toArray()[index + 1];
+					tmpLow = (Double)localMap.keySet().toArray()[index - 1];
 				}
 				catch (ArrayIndexOutOfBoundsException e){
-					tmpHigh = tmpLow;
+					tmpLow = tmpHigh;
 				}
 				break;
 			}
@@ -378,6 +391,7 @@ public class SmithBasicModeler extends Modeler {
 		else {
 			med = localMap.get(tmpHigh);
 		}
+		System.out.println("modeler: (eval med) val="+val+", med="+med+", tmpLow="+tmpLow+", tmpHigh="+tmpHigh);
 		return med;
 	}
 
