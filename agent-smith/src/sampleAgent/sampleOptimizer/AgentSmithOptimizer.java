@@ -190,6 +190,7 @@ public class AgentSmithOptimizer extends Optimizer
 			}
 			else
 			{
+				optquery.setDailyLimit(initialDailyQuerySpentLimit);
 				dailyQuerySpentLimit = (isPriorityManufacturer||isPriorityComponent)?((isPriorityManufacturer&&isPriorityComponent)?(initialDailyQuerySpentLimit*spentLimitHighPriorityFactor):(initialDailyQuerySpentLimit*spentLimitMediumPriorityFactor)):initialDailyQuerySpentLimit;
 			}
 			
@@ -300,6 +301,7 @@ public class AgentSmithOptimizer extends Optimizer
 				for (int bidIndex = 0; bidIndex < query.bids.length; bidIndex++)
 				{
 					estimated = aaEstimator.estimateQuery(query.getQuery(), query.bids[bidIndex], query.ad, query.dailyLimit, yday + 2);		
+					System.out.println("OPTIMIZER: Bid-" + query.bids[bidIndex] + ", Impr-" + estimated.getImpressions() + ", CPC-" + estimated.getCpc() + ", Conv-" +  estimated.getConversions() + ", Clicks-" + estimated.getClicks() + ", Prof-" +  estimated.getProfits());
 					query.setEstimates(bidIndex, estimated.getImpressions(), estimated.getCpc(), estimated.getConversions(), estimated.getClicks(), estimated.getProfits());
 					gMkcp.add(query.getQuery(), bidIndex, query.bids[bidIndex], estimated.getConversions(), ((estimated.getConversions()*10)- (estimated.getClicks()*estimated.getCpc())));
 				}
