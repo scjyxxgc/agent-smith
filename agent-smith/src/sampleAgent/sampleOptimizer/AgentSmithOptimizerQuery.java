@@ -118,12 +118,12 @@ public class AgentSmithOptimizerQuery extends AgentComponentQuery
 
 	public void nextDay(int day)
 	{
-		dailyLimit = 250;
+		//dailyLimit = 0.0;
 	}
 
 	protected void calculateDailyLimit(int theBestBidIndex)
 	{
-		dailyLimit = 5*estCpc[theBestBidIndex] * estClicks[theBestBidIndex] / estConversions[theBestBidIndex]; // need to change 5
+		dailyLimit = estCpc[theBestBidIndex] * estClicks[theBestBidIndex];
 	}
 	
 	protected void setDailyLimit(double theDailyLimit)

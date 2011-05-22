@@ -1,7 +1,5 @@
 package sampleAgent.sampleOptimizer;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +22,7 @@ public class AgentSmithOptimizer extends Optimizer
 	private static final Logger log = Logger.getLogger("optimizer");
 
 	/*
-	 * Game Constantd
+	 * Game Constants
 	 */
 	final static protected double UNIT_SALES_PROFIT = 10;
 	final static protected double MANUFACTURER_SPECIALIST_BONUS = 0.4;
@@ -34,28 +32,37 @@ public class AgentSmithOptimizer extends Optimizer
 	/*
 	 * algorithm parameters
 	 */
-	protected double INITIAL_BID_DEFAULT = 2.5;
+	protected double INITIAL_BID_DEFAULT = 1.5;
 
-	protected double initialDailyQuerySpentLimit = 150;
-	//protected static double INITIAL_DAILY_QUERY_SPENT_LIMIT_DEFAULT = 20.0;
+	protected double initialDailyQuerySpentLimit = 200;
 	
-	protected int dailyQuerySpentLimit = 250;
+	protected int dailyQuerySpentLimit = 300;
 	
-	protected float incRoiFactor = 1.15f;
-	//protected final float EQUATE_ROI_INCREASE_ROI_FACTOR_DEFAULT = 1.1f;
+	protected float incRoiFactor = 1.3f;	
 	
-	protected float incBidFactor = 0.10f;
-	//protected final float EQUATE_ROI_INCREASE_BID_FACTOR_DEFAULT = 1.05f;
+	protected float incBidFactor = 0.1f;
 	
-	protected float incBidFactorPriority = 0.6f;
-	//protected final float EQUATE_ROI_INCREASE_PRIORITY_BID_FACTOR_DEFAULT = 1.1f;
+	protected float incBidFactorMediumPriority = 0.5f;
+	
+	protected float incBidFactorHighPriority = 0.6f;
 
-	protected float startTargetRoi = 10;
+	protected float startTargetRoi = 10.0f;
 	
-	protected float spentLimitPriorityFactor = 1.2f;
+	protected float spentLimitMediumPriorityFactor = 1.0f;
+		
+	protected float spentLimitHighPriorityFactor = 1.1f;
 	
-	protected float extendCapacityFactor = 1f;
+	protected float extendCapacityFactor = 1.0f;
 	
+	protected double campaignDailySpendLimitFactor = 12.0;
+	
+	protected double dailyQuerySpentLimitOnBurstFactor = 1.2;
+		
+	protected float burstBidIncFactor = 1.2f;
+	
+	protected float burstIdentifyFactor = 1.4f;
+	
+	protected int positionThreshold = 4;
 	
 	/*
 	 * quota calculation variables
@@ -98,16 +105,12 @@ public class AgentSmithOptimizer extends Optimizer
 	protected EquateROI equateRoiInstance;
 	
 	protected boolean useEquateRoiAlgorithm = false;
-	
-	protected int sim_id;
 
 	public AgentSmithOptimizer()
 	{
 		querySpace = new LinkedList<AgentSmithOptimizerQuery>();
 		salesWindow = new LinkedList<Integer>();
 		estimated = new QueryEstimateResult();
-		
-		equateRoiInstance = new EquateROI(startTargetRoi, incRoiFactor, incBidFactor, incBidFactorPriority);
 	}
 
 	/*
@@ -118,7 +121,7 @@ public class AgentSmithOptimizer extends Optimizer
 		querySet = aaAgent.getQuerySet();
 		day = 0;
 		
-		sim_id = aaAgent.getStartInfo().getSimulationID();	
+		equateRoiInstance = new EquateROI(startTargetRoi, incRoiFactor, incBidFactor, incBidFactorMediumPriority, incBidFactorHighPriority, positionThreshold, burstBidIncFactor, burstIdentifyFactor);
 		
 		/* create queries space */
 		for (Query query : querySet)
@@ -183,13 +186,13 @@ public class AgentSmithOptimizer extends Optimizer
 			/* dailyLimit is irrelevant until day 2 since no reports were received */
 			if (tomorrow > 2)
 			{	
-				dailyQuerySpentLimit = (isPriorityManufacturer||isPriorityComponent)?(optquery.dailyLimit*spentLimitPriorityFactor):optquery.dailyLimit;
+				dailyQuerySpentLimit = (isPriorityManufacturer||isPriorityComponent)?((isPriorityManufacturer&&isPriorityComponent)?(optquery.dailyLimit*spentLimitHighPriorityFactor):(optquery.dailyLimit*spentLimitMediumPriorityFactor)):optquery.dailyLimit;
 			}
 			else
 			{
-				dailyQuerySpentLimit = (isPriorityManufacturer||isPriorityComponent)?(initialDailyQuerySpentLimit*spentLimitPriorityFactor):initialDailyQuerySpentLimit;
+				dailyQuerySpentLimit = (isPriorityManufacturer||isPriorityComponent)?((isPriorityManufacturer&&isPriorityComponent)?(initialDailyQuerySpentLimit*spentLimitHighPriorityFactor):(initialDailyQuerySpentLimit*spentLimitMediumPriorityFactor)):initialDailyQuerySpentLimit;
 			}
-
+			
 			if(useEquateRoiAlgorithm)
 			{
 				bidBundle.setBid(query, optquery.equateRoiBid);
@@ -204,15 +207,12 @@ public class AgentSmithOptimizer extends Optimizer
 			bidBundle.setAd(query, optquery.ad);
 			bidBundle.setDailyLimit(query, dailyQuerySpentLimit);
 			
-			bidBundle.setCampaignDailySpendLimit(dailyQuerySpentLimit*12); // TEST - TEMPORARY
+			//bidBundle.setCampaignDailySpendLimit(dailyQuerySpentLimit*campaignDailySpendLimitFactor);
 
 			// for log prints
 			Double dlimit = dailyQuerySpentLimit;
-			//Double dcl = optquery.estClicks[optquery.bestBidIndex];
-			//Double dcv = optquery.estConversions[optquery.bestBidIndex];
-			//double dcpc = (double) (((Double) (100 * optquery.estCpc[optquery.bestBidIndex])).intValue()) / 100;
 			double dbid = (double) (((Double) (100 * bidBundle.getBid(query))).intValue()) / 100;
-			log.log(Level.FINE, "(" + query.getManufacturer() + "," + query.getComponent() + ")" + " bid: " + dbid + ", dailyLimit: " + dlimit.intValue() /*+ " (clicks:" + dcl.intValue() + " conversions:" + dcv.intValue() + " cpc:" + dcpc + ")"*/);
+			log.log(Level.FINE, "(" + query.getManufacturer() + "," + query.getComponent() + ")" + " bid: " + dbid + ", dailyLimit: " + dlimit.intValue());
 		}
 
 		bidBundle.setCampaignDailySpendLimit(Double.NaN);
@@ -261,12 +261,10 @@ public class AgentSmithOptimizer extends Optimizer
 			if (salesWindow.size() >= CAPACITY_WINDOW - 1)
 			{
 				estimatedCapacityUsed = capacityUsed + estimatedSales - salesWindow.peek();
-	//			capacityQuota = (int) ((CAPACITY - estimatedCapacityUsed) * extendCapacityFactor);
 				capacityQuota = (CAPACITY - capacityUsed)/2;
 			} else
 			{
 				estimatedCapacityUsed = capacityUsed + estimatedSales;
-	//			capacityQuota = (int) (((CAPACITY - estimatedCapacityUsed)/(CAPACITY_WINDOW - yesterday)) * extendCapacityFactor);
 				capacityQuota = (CAPACITY - capacityUsed)/(CAPACITY_WINDOW - yesterday);
 			}		
 		}
@@ -281,7 +279,7 @@ public class AgentSmithOptimizer extends Optimizer
 		estimatedSales = 0;
 		log.log(Level.FINE, " Query report for day " + yday);
 		
-		long start = System.currentTimeMillis();
+		//long start = System.currentTimeMillis();
 		if (yday > 0)
 		{
 			//System.out.println("***************** Before HybridPenalizedGreedyMCKP, capacity=" + CAPACITY + " window=" + CAPACITY_WINDOW);
@@ -303,11 +301,7 @@ public class AgentSmithOptimizer extends Optimizer
 				{
 					estimated = aaEstimator.estimateQuery(query.getQuery(), query.bids[bidIndex], query.ad, query.dailyLimit, yday + 2);		
 					query.setEstimates(bidIndex, estimated.getImpressions(), estimated.getCpc(), estimated.getConversions(), estimated.getClicks(), estimated.getProfits());
-					
-					System.out.println(query.getQuery().getManufacturer()+ "_" + query.getQuery().getComponent() + "_" + bidIndex + " - " + estimated.getImpressions() + ", " +  estimated.getCpc() + ", " +  estimated.getConversions() + ", " +  estimated.getClicks() + ", " +  estimated.getProfits());
-
-					//gMkcp.add(query.getQuery(), bidIndex, query.bids[bidIndex], estimated.getConversions(), ((estimated.getConversions()*10)- (estimated.getClicks()*estimated.getCpc())));
-					gMkcp.add(query.getQuery(), bidIndex, query.bids[bidIndex], estimated.getConversions(), estimated.getProfits());
+					gMkcp.add(query.getQuery(), bidIndex, query.bids[bidIndex], estimated.getConversions(), ((estimated.getConversions()*10)- (estimated.getClicks()*estimated.getCpc())));
 				}
 				
 				equateRoiInstance.add(query.getQuery(), query.yesterdayConversions, query.yesterdayClicks, isPriorityManufacturer, isPriorityComponent, query.yesterdayPosition, query.yesterdayImpressions, yday);
@@ -325,7 +319,7 @@ public class AgentSmithOptimizer extends Optimizer
 					query.setEquateRoiBid(queriesBidsMap.get(query.getQuery()));
 				
 					if(equateRoiInstance.getIsBurst())
-						query.setDailyLimit(dailyQuerySpentLimit*1.2); // NEED TO ADJUST THIS	
+						query.setDailyLimit(dailyQuerySpentLimit*dailyQuerySpentLimitOnBurstFactor); // NEED TO ADJUST THIS	
 					else
 						query.setDailyLimit(dailyQuerySpentLimit); // NEED TO ADJUST THIS			
 					
@@ -345,35 +339,14 @@ public class AgentSmithOptimizer extends Optimizer
 		
 			}
 		}
-		long stop = System.currentTimeMillis();
-		System.out.println("***** OPTIMIZER: Total run time for optimizer (in milis) = " + (stop-start));
+		//long stop = System.currentTimeMillis();
+		//System.out.println("***** Total run time for optimizer (in milis) = " + (stop-start));
 	}
 
 	public void simulationFinished()
 	{
 		querySpace.clear();
 		salesWindow.clear();
-	/*	
-		String[] arguments = new String[] {"-handler", "trainer.GameLogHandler", "-file", "..\\..\\..\\aa-server-10.1.0.1\\sim" + sim_id + ".slg"};
-        try
-		{
-			se.sics.tasim.logtool.Main.main(arguments);
-		} catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		
-		try
-		{
-			//TODO: revise path
-			new File("c:\\game_results\\" + sim_id + "_" + startTargetRoi + "_" + incRoiFactor + "_" +  incBidFactor + "_" +  incBidFactorPriority + "_" + INITIAL_BID_DEFAULT + "_" + initialDailyQuerySpentLimit + "_" + dailyQuerySpentLimit + "_" + spentLimitPriorityFactor).createNewFile();
-		} catch (IOException e)
-		{
-			e.printStackTrace();
-		}
-		
-		GameLogDataStruct.getInstance().getGamesReports().clear();
-		*/
 	}
 
 	public void simulationSetup()

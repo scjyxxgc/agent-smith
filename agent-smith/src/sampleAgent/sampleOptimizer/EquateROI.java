@@ -11,15 +11,21 @@ public class EquateROI
 	private float targetROI;
 	private float INC_ROI;
 	private float INC_BID;
-	private float INC_BID_P;
+	private float INC_BID_MP;
+	private float INC_BID_HP;
+	
+	private float burstIdentifyFactor;
+	private float burstIncBidFactor;
 	
 	private int totalSales = 0;
 	private int yesterday = 0;
-	private int startToCheckBurstFromDay = 4;
+	private int startToCheckBurstFromDay = 5;
 	private int checkForBurstFromDay;
 	private boolean isBurst = false;
+	
+	private int positionThreshold;
 
-	private double totalImpressionsForAllDaysSoFar = 0;
+	private double totalImpressionsForAllDaysSoFar;
 	
 	Map<Query, Integer> querySales;
 	Map<Query, Integer> queryClicks;
@@ -29,13 +35,17 @@ public class EquateROI
 	Map<Query, Double> queryBid;
 	Map<Query, Double> queryPosition;
 	
-	public EquateROI(float startTargetRoi, float incRoiFactor, float incBidFactor, float incBidFactorPriority)
+	public EquateROI(float startTargetRoi, float incRoiFactor, float incBidFactor, float incBidFactorMediumPriority,float incBidFactorHighPriority, int positionThreshold, float burstIncBidFactor, float burstIdentifyFactor)
 	{
 		targetROI = startTargetRoi; // maybe we can optimize using previous game reports
 
 		INC_ROI = incRoiFactor;
 		INC_BID = incBidFactor;
-		INC_BID_P = incBidFactorPriority;
+		INC_BID_MP = incBidFactorMediumPriority;
+		INC_BID_HP = incBidFactorHighPriority;
+		
+		this.burstIncBidFactor = burstIncBidFactor;
+		this.burstIdentifyFactor = burstIdentifyFactor;
 		
 		querySales = new HashMap<Query, Integer>();
 		queryClicks = new HashMap<Query, Integer>();
@@ -45,6 +55,9 @@ public class EquateROI
 		queryBid = new HashMap<Query, Double>();
 		queryPosition = new HashMap<Query, Double>();
 		
+		this.positionThreshold = positionThreshold;
+		
+		 totalImpressionsForAllDaysSoFar = 0;
 		checkForBurstFromDay = startToCheckBurstFromDay;
 	}
 
@@ -106,7 +119,7 @@ public class EquateROI
 		isBurst=false;
 		if(yesterday>checkForBurstFromDay)
 		{
-			isBurst = totalImpressionsForDay > ((totalImpressionsForAllDaysSoFar/(double)yesterday)*1.3);
+			isBurst = totalImpressionsForDay > ((totalImpressionsForAllDaysSoFar/(double)yesterday)*burstIdentifyFactor);
 			checkForBurstFromDay = yesterday + 1;
 		}
 		totalImpressionsForAllDaysSoFar+=totalImpressionsForDay;
@@ -126,10 +139,10 @@ public class EquateROI
 				
 				if(queryIsPriorityManufacturer.get(query) || queryIsPriorityComponent.get(query))
 				{
-					if(queryPosition.get(query) < 4)
+					if(queryPosition.get(query) < positionThreshold)
 						bid = (cpc + INC_BID);
 					else
-						bid = (cpc + INC_BID_P);
+						bid = (queryIsPriorityManufacturer.get(query) && queryIsPriorityComponent.get(query))?(cpc + INC_BID_HP):(cpc + INC_BID_MP);
 				}
 				else
 					bid = (cpc + INC_BID);
@@ -138,17 +151,17 @@ public class EquateROI
 			{
 				if(queryIsPriorityManufacturer.get(query) || queryIsPriorityComponent.get(query))
 				{
-					if(queryPosition.get(query) < 4)
+					if(queryPosition.get(query) < positionThreshold)
 						bid = queryBid.get(query) + INC_BID;
 					else
-						bid = queryBid.get(query) + INC_BID_P;
+						bid = (queryIsPriorityManufacturer.get(query) && queryIsPriorityComponent.get(query))?(queryBid.get(query) + INC_BID_HP):(queryBid.get(query) + INC_BID_MP);
 				}
 				else
 					bid = queryBid.get(query) + INC_BID;
 			}
 			
 			if(isBurst)
-				bid = bid * 1.1;
+				bid = bid * burstIncBidFactor;
 			
 			queryBid.put(query, bid);
 			
