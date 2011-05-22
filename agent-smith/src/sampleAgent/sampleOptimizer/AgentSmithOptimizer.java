@@ -303,7 +303,7 @@ public class AgentSmithOptimizer extends Optimizer
 					estimated = aaEstimator.estimateQuery(query.getQuery(), query.bids[bidIndex], query.ad, query.dailyLimit, yday + 2);		
 					System.out.println("OPTIMIZER: Bid-" + query.bids[bidIndex] + ", Impr-" + estimated.getImpressions() + ", CPC-" + estimated.getCpc() + ", Conv-" +  estimated.getConversions() + ", Clicks-" + estimated.getClicks() + ", Prof-" +  estimated.getProfits());
 					query.setEstimates(bidIndex, estimated.getImpressions(), estimated.getCpc(), estimated.getConversions(), estimated.getClicks(), estimated.getProfits());
-					gMkcp.add(query.getQuery(), bidIndex, query.bids[bidIndex], estimated.getConversions(), ((estimated.getConversions()*10)- (estimated.getClicks()*estimated.getCpc())));
+					gMkcp.add(query.getQuery(), bidIndex, query.bids[bidIndex], estimated.getConversions(), estimated.getProfits());
 				}
 				
 				equateRoiInstance.add(query.getQuery(), query.yesterdayConversions, query.yesterdayClicks, isPriorityManufacturer, isPriorityComponent, query.yesterdayPosition, query.yesterdayImpressions, yday);
@@ -330,8 +330,12 @@ public class AgentSmithOptimizer extends Optimizer
 				else
 				{
 					query.setBestBidIndex(bestBidsIndexMap.get(query.getQuery()));	
-					query.calculateDailyLimit(bestBidsIndexMap.get(query.getQuery()));
-					estimatedSales += (int) (query.estConversions[query.bestBidIndex]);
+					//query.calculateDailyLimit(bestBidsIndexMap.get(query.getQuery()));
+					//estimatedSales += (int) (query.estConversions[query.bestBidIndex]);
+					
+					query.setDailyLimit(dailyQuerySpentLimit); // NEED TO ADJUST THIS			
+					
+					estimatedSales += capacityQuota/querySpace.size();
 				}		
 				
 				double dcpc = (double) (((Double) (100 * queryReport.getCPC(query.getQuery()))).intValue()) / 100;
