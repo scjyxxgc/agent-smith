@@ -249,7 +249,7 @@ public class GameLogParser extends Parser
 	protected void nextDay(int date, long serverTime)
 	{
 		day = date;
-		System.out.println("---> New Day: " + day);
+		//System.out.println("---> New Day: " + day);
 	}
 
 	protected void parseStopped()
