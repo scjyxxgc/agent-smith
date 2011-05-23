@@ -36,15 +36,16 @@ public class MyBasicEstimatorQuery extends AgentComponentQuery {
 		estSales =	 	new Double[TAU_SIMDAYS+3];
 		estConvRate =	new Double[TAU_SIMDAYS+3];
 		estClickRate =  new Double[TAU_SIMDAYS+3];
+		
 		sales = 		new int[TAU_SIMDAYS+3];
 		convRate = 		new Double[TAU_SIMDAYS+3];
 		clicks = 		new int[TAU_SIMDAYS+3];
 		clickRate = 	new Double[TAU_SIMDAYS+3];
 		profitPerUnitSold =	new Double[TAU_SIMDAYS+3];
 		
-		b1= new Double[TAU_SIMDAYS+3];
-		b2= new Double[TAU_SIMDAYS+3];
-		b3= new Double[TAU_SIMDAYS+3];
+		b1 = new Double[TAU_SIMDAYS+3];
+		b2 = new Double[TAU_SIMDAYS+3];
+		b3 = new Double[TAU_SIMDAYS+3];
 		
 		nextDay(0);
 	}
@@ -54,13 +55,13 @@ public class MyBasicEstimatorQuery extends AgentComponentQuery {
 	 * @see arch.AgentComponentQuery#nextDay(int)
 	 */
 	public void nextDay(int day) {
-		estSales[day]=SALES_INIT;
-		estConvRate[day]=CONVR_INIT;
+		estSales[day] = SALES_INIT;
+		estConvRate[day] = CONVR_INIT;
 		estClickRate[day] = CLKR_INIT;
 		
-		b1[day]=0.0;
-		b2[day]=0.0;
-		b3[day]=0.0;
+		b1[day] = 0.0;
+		b2[day] = 0.0;
+		b3[day] = 0.0;
 	}
 	
 }
