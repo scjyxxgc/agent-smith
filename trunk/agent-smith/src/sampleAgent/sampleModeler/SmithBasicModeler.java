@@ -332,7 +332,7 @@ public class SmithBasicModeler extends Modeler {
 //			printMap(avgBidPositionsByLog.get(query.getQuery()));
 			avgPosLog = evalMedFromMap(bid, avgBidPosByLog.get(query.getQuery()));
 			
-			System.out.println("modeler: avgImpLog="+avgImpLog+" avgCpcLog="+avgCpcLog+" avgPosLog="+avgPosLog);
+//			System.out.println("modeler: avgImpLog="+avgImpLog+" avgCpcLog="+avgCpcLog+" avgPosLog="+avgPosLog);
 		
 		} else {
 			daySum = day;
@@ -354,18 +354,18 @@ public class SmithBasicModeler extends Modeler {
 			avgBidImpByCurrGame.put(query.getQuery(), estimateByBidFromListByCurrGame(query, query.gameImp));
 			avgBidCpcByCurrGame.put(query.getQuery(), estimateByBidFromListByCurrGame(query, query.gameCpc));
 			
-			System.out.println("modeler: PosByCurr map");
-			printMap(avgBidPosByCurrGame.get(query.getQuery()));
-			System.out.println("modeler: ImpByCurr map");
-			printMap(avgBidImpByCurrGame.get(query.getQuery()));
-			System.out.println("modeler: CpcByCurr map");
-			printMap(avgBidCpcByCurrGame.get(query.getQuery()));
+//			System.out.println("modeler: PosByCurr map");
+//			printMap(avgBidPosByCurrGame.get(query.getQuery()));
+//			System.out.println("modeler: ImpByCurr map");
+//			printMap(avgBidImpByCurrGame.get(query.getQuery()));
+//			System.out.println("modeler: CpcByCurr map");
+//			printMap(avgBidCpcByCurrGame.get(query.getQuery()));
 			
 			avgPosCurr = evalMedFromMap(bid, avgBidPosByCurrGame.get(query.getQuery()));
 			avgImpCurr = evalMedFromMap(bid, avgBidImpByCurrGame.get(query.getQuery()));
 			avgCpcCurr = evalMedFromMap(bid, avgBidCpcByCurrGame.get(query.getQuery()));
 			
-			System.out.println("modeler: avgImpCurr="+avgImpCurr+" avgCpcCurr="+avgCpcCurr+" avgPosCurr="+avgPosCurr);
+//			System.out.println("modeler: avgImpCurr="+avgImpCurr+" avgCpcCurr="+avgCpcCurr+" avgPosCurr="+avgPosCurr);
 		}
 
 		double logPrec = ((double)TAU_SIMDAYS) / ((double)daySum);
@@ -414,7 +414,7 @@ public class SmithBasicModeler extends Modeler {
 		else {
 			med = localMap.get(tmpHigh);
 		}
-		System.out.println("modeler: (eval med) val="+val+", med="+med+", tmpLow="+tmpLow+", tmpHigh="+tmpHigh);
+//		System.out.println("modeler: (eval med) val="+val+", med="+med+", tmpLow="+tmpLow+", tmpHigh="+tmpHigh);
 		return med;
 	}
 
