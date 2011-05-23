@@ -21,8 +21,8 @@ public class MyBasicEstimator extends Estimator
 	// where defined ?
 	double decay;
 	
-	protected static double GAMMA = 0.8;
-	protected static double DECAY_DEFAULT = 0.05;
+	protected static double GAMMA = 0.5;
+	protected static double DECAY_DEFAULT = 0.5;
 	protected Queue<MyBasicEstimatorQuery> querySpace;
 	
 	//builder
@@ -126,9 +126,7 @@ public class MyBasicEstimator extends Estimator
 		double position;
 		double weight1 = 1.0;
 		double weight2 = 1.0;
-			
-		System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ESTIMATOR: input from optimizer: query = "+query+" bid = "+bid+" ad = "+ad+" day = "+day);
-
+		
 		
 		for(MyBasicEstimatorQuery equery : querySpace) 
 		{      				
@@ -174,14 +172,12 @@ public class MyBasicEstimator extends Estimator
 				
 				//set weight factor
 				weight1 = 1.0 / position;
+				
 				if (position != 1.0) 
 					weight2 = 1 - weight1;
 			
 				//set profits with weighted position fit
-				result.setProfits(weight1*conversions*equery.profitPerUnitSold[day-2] - weight2*clicks*cpc);
-				
-				System.out.println("@@@@@@@ ESTIMATOR - modeler results: cpc = "+cpc+" impressions = "+impressions+" pos = "+position+" weight1 = "+weight1+" profits = "+result.getProfits());	
-
+				result.setProfits(weight1*conversions*equery.profitPerUnitSold[day-2] - weight2*clicks*cpc);	
 			}
 		}
 		return result;
@@ -223,7 +219,7 @@ public class MyBasicEstimator extends Estimator
 		return estimated;
 	}
 
-	//what is the purpose ?
+	//simulation's configuration
 	public void simulationSetup() 
 	{
 		decay = aaConfig.getPropertyAsDouble("Decay", DECAY_DEFAULT);
