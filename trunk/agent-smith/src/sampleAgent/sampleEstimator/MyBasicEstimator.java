@@ -14,22 +14,24 @@ import edu.umich.eecs.tac.props.SalesReport;
 import arch.Estimator;
 import arch.IModeler.ModelerResult;
 
+
+//simple DES implementation with weighted position fit
 public class MyBasicEstimator extends Estimator
 {
-	
+	// where defined ?
 	double decay;
 	
-	//DES
-	protected static double GAMMA = 0.2;
-	protected static double DECAY_DEFAULT = 0.1;
+	protected static double GAMMA = 0.8;
+	protected static double DECAY_DEFAULT = 0.05;
 	protected Queue<MyBasicEstimatorQuery> querySpace;
 	
+	//builder
 	public MyBasicEstimator() 
 	{		
 		querySpace = new LinkedList<MyBasicEstimatorQuery>();		
 	}
 
-	
+	//prepare simulation
 	public void simulationReady() 
 	{		
 		Set<Query> querySet = aaAgent.getQuerySet();		
@@ -39,57 +41,45 @@ public class MyBasicEstimator extends Estimator
 	    }
 	}
 	
-	
+	//simulation iterator
 	public void nextDay(int day) 
 	{
 		for(MyBasicEstimatorQuery query : querySpace) 
-		{ 
-        query.nextDay(day);     
-	    }
+			query.nextDay(day);
 	}
 	
+	
+	//estimate and set clicks and conversions rate values 
 	public void handleQueryReport(QueryReport queryReport, int yday) 
 	{
 		int impressions;
 		
 		for(MyBasicEstimatorQuery query : querySpace) 
 		{      	
-        
-		 query.clicks[yday] = queryReport.getClicks(query.getQuery());
-         impressions = queryReport.getImpressions(query.getQuery());
+			query.clicks[yday] = queryReport.getClicks(query.getQuery());
+			impressions = queryReport.getImpressions(query.getQuery());
          		
-        		/* update values */        
-	        	if (impressions == 0) 
-        				query.clickRate[yday] = 0.0;
-           		else 
-           				query.clickRate[yday] = ((double)(query.clicks[yday]))/((double)(impressions));
+        	//set clicks and conversions rate        
+	        if (impressions == 0) 
+	        	query.clickRate[yday] = 0.0;
+           	else 
+           		query.clickRate[yday] = ((double)(query.clicks[yday]))/((double)(impressions));
+        
+	        if (query.clicks[yday] == 0) 
+	        	query.convRate[yday] = 0.0;
+	        else
+	        	query.convRate[yday] = ((double)(query.sales[yday]))/((double)(query.clicks[yday]));
 
-        	        
-	        	if (query.clicks[yday] == 0) 
-	        		query.convRate[yday] = 0.0;
-	        	else
-	        		query.convRate[yday] = ((double)(query.sales[yday]))/((double)(query.clicks[yday]));
 
-        //query.estConvRate[yday+2] = decay*query.convRate[yday]+(1-decay)*query.estConvRate[yday+1];
-			/*if (yday==3){
-				  System.out.println("query.convRate[yday-1]="+query.convRate[yday-1]);
-	        	  System.out.println("query.clickRate[yday-1]="+query.clickRate[yday-1]);
-	        	  System.out.println("query.convRate[yday]="+query.convRate[yday]);
-	        	  System.out.println("query.clickRate[yday]="+query.clickRate[yday]);
-			}*/
-			
-	        // update estimated values
+	        //set estimated conversions rate
 			query.estConvRate[yday+2] = decay*query.convRate[yday]+(1-decay)*(query.estConvRate[yday+1]+query.b1[yday+1]);
 			query.b1[yday+2] = GAMMA*(query.estConvRate[yday+2]-query.estConvRate[yday+1])+(1-GAMMA)*query.b1[yday+1];
-			
-			        
-			/*query.estConvRate[yday+2] = decay*query.convRate[yday]+(1-decay)*(query.estConvRate[yday+1] + b[yday+1]);
-        	 * b[yday+2] = c*(query.estConvRate[yday+2] - query.estConvRate[yday+1]) + (1-c)*b[yday+1];*/
+	        
         	
-			//query.estClickRate[yday+2] = decay*query.clickRate[yday]+(1-decay)*query.estClickRate[yday+1];
-			
+			//set estimated clicks rate
 			query.estClickRate[yday+2] = decay*query.clickRate[yday]+(1-decay)*(query.estClickRate[yday+1]+query.b2[yday+1]);
 			query.b2[yday+2] = GAMMA*(query.estClickRate[yday+2]-query.estClickRate[yday+1])+(1-GAMMA)*query.b2[yday+1];     	
+			
        	}
 	}
 	
@@ -98,19 +88,14 @@ public class MyBasicEstimator extends Estimator
 	{
 		
 		for(MyBasicEstimatorQuery query : querySpace) 
-		{      	
+		{   
+			//set sales
         	query.sales[yday] = salesReport.getConversions(query.getQuery());  	
 
-        	//query.estSales[yday+2] = decay*query.sales[yday]+(1-decay)*query.estSales[yday+1];
-        	//System.out.println("!!!query="+query+" bid="+bid+"ad="+ad+"day="+day);
-        	/*if (yday==3){
-        	  System.out.println("query.sales[yday-1]="+query.sales[yday-1]);
-        	  System.out.println("query.sales[yday]="+query.sales[yday]);
-        	}*/
-        	
+ 
+        	//set estimated sales
         	query.estSales[yday+2] = decay*query.sales[yday]+(1-decay)*(query.estSales[yday+1]+query.b3[yday+1]);
 			query.b3[yday+2] = GAMMA*(query.estSales[yday+2]-query.estSales[yday+1])+(1-GAMMA)*query.b3[yday+1];
-        	
 
         	if (query.sales[yday]!=0)        
 				query.profitPerUnitSold[yday] = salesReport.getRevenue(query.getQuery())/((double)query.sales[yday]);        
@@ -119,7 +104,7 @@ public class MyBasicEstimator extends Estimator
 		}
 	}
 	
-		
+	//finish simulation
 	public void simulationFinished() 
 	{
 		querySpace.clear();		
@@ -139,54 +124,64 @@ public class MyBasicEstimator extends Estimator
 		double conversions;
 		//
 		double position;
-		double weight = 1.0;
-//		double weight1 = 1.0;
+		double weight1 = 1.0;
+		double weight2 = 1.0;
 			
+		System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ESTIMATOR: input from optimizer: query = "+query+" bid = "+bid+" ad = "+ad+" day = "+day);
+
+		
 		for(MyBasicEstimatorQuery equery : querySpace) 
 		{      				
 			if (equery.getQuery().equals(query)) 
 			{
-				//System.out.println("!!!query="+query+" bid="+bid+"ad="+ad+"day="+day);
+				//set model parameters
 				modelerResult = aaModeler.model(query, bid,  ad,  day);				
 				
+				//set cpc
 				cpc = modelerResult.getCpc();				
 				result.setCpc(cpc);
+				
+				//set impressions
 				impressions = modelerResult.getImpressions();				
 				result.setImpressions(impressions);
 				
-				position = modelerResult.getPosition();
-				
-//				if ((position >= 2)&&(position <= 4))
-//					weight1 = 0.75;
-//				if ((position >= 5)&&(position <= 8))
-//					weight1 = 0.5;
-				
-				if (position < 1.0) {
-					position = Math.round(position);
-				}
-				
-				if (position == 0){
-					Random generator = new Random( 19580427 );
-					position = generator.nextDouble()*7.0 + 1.0;
-				}
-				
-				weight = 1.0 / position;
-				
-				System.out.println("******** ESTIMATOR - modeler results: cpc = "+cpc+" impressions = "+impressions+" pos = "+position+" weight = "+weight);
-
+				//set clicks
 				clicks = impressions*equery.estClickRate[day];
 				
-				/*if estimated number of clicks more than spending limit, set it to max*/
-				if (clicks*cpc > limit)
+				//if estimated number of clicks costs more than spending limit, set it to max
+				if ((clicks*cpc > limit) && (cpc != 0))
 					clicks=limit/cpc;			
 								
 				result.setClicks(clicks);
 				
+				//set conversions
 				conversions = clicks*equery.estConvRate[day];				
-				result.setConversions(conversions);				
+				result.setConversions(conversions);	
 				
-//				System.out.println("**** ESTIMATOR: conversion ="+conversions+" PPUS[yday-2] = "+equery.profitPerUnitSold[day-2]+" clicks = "+clicks+" cpc = "+cpc);
-				result.setProfits(weight*conversions*equery.profitPerUnitSold[day-2] - clicks*cpc);
+				//set position
+				position = modelerResult.getPosition();
+								
+				if (position < 1.0) {
+					position = Math.round(position);
+				}
+				
+				//set position as random if supposed to be zero
+				if (position == 0.0)
+				{
+					Random generator = new Random( 19580427 );
+					position = generator.nextDouble()*7.0 + 1.0;
+				}
+				
+				//set weight factor
+				weight1 = 1.0 / position;
+				if (position != 1.0) 
+					weight2 = 1 - weight1;
+			
+				//set profits with weighted position fit
+				result.setProfits(weight1*conversions*equery.profitPerUnitSold[day-2] - weight2*clicks*cpc);
+				
+				System.out.println("@@@@@@@ ESTIMATOR - modeler results: cpc = "+cpc+" impressions = "+impressions+" pos = "+position+" weight1 = "+weight1+" profits = "+result.getProfits());	
+
 			}
 		}
 		return result;
@@ -228,11 +223,10 @@ public class MyBasicEstimator extends Estimator
 		return estimated;
 	}
 
+	//what is the purpose ?
 	public void simulationSetup() 
 	{
-		
 		decay = aaConfig.getPropertyAsDouble("Decay", DECAY_DEFAULT);
-	
 	}
 	
 
