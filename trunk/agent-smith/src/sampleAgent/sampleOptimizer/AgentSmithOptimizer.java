@@ -120,6 +120,14 @@ public class AgentSmithOptimizer extends Optimizer
 	{
 		querySet = aaAgent.getQuerySet();
 		day = 0;
+		int numOfGames = GameLogDataStruct.getInstance().getGamesReports().size();
+		if (numOfGames % 2 != 0){
+			useEquateRoiAlgorithm = false;
+			System.out.println("not using useEquateRoiAlgorithm");
+		}else{
+			useEquateRoiAlgorithm = true;
+			System.out.println("using useEquateRoiAlgorithm");
+		}
 		
 		equateRoiInstance = new EquateROI(startTargetRoi, incRoiFactor, incBidFactor, incBidFactorMediumPriority, incBidFactorHighPriority, positionThreshold, burstBidIncFactor, burstIdentifyFactor);
 		
