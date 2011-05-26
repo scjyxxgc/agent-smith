@@ -40,10 +40,11 @@ public class SmithBasicModeler extends Modeler {
 	
 	public void simulationReady() {
 		Set<Query> querySet = aaAgent.getQuerySet();
-		simID = this.aaAgent.getStartInfo().getSimulationID();
 		for(Query query : querySet) { 
 			querySpace.add(new SmithBasicModelerQuery(query));
 		}
+		
+		simID = this.aaAgent.getStartInfo().getSimulationID();
 	}
 
 	public void nextDay(int day) {
@@ -235,42 +236,6 @@ public class SmithBasicModeler extends Modeler {
 		return avgBidVal;
 	}
 
-//	private TreeMap<Double, Double> avgBidPosCalc(ArrayList<Double> bidResults, ArrayList<Double> slotInfoResults) {
-//		ArrayList<Double>[] posBidArray = new ArrayList[NUM_OF_PLAYERS + 1];
-//		TreeMap<Double, Double> avgBidPos = new TreeMap<Double, Double>();
-//		int pos = 0;
-//		double bid = 0.0;
-//		//init
-//		for (int i = 0; i <= NUM_OF_PLAYERS; i++)
-//		{
-//			posBidArray[i] = new ArrayList<Double>();
-//		}
-//
-//
-//		for (int i = 0; i < bidResults.size(); i++)
-//		{
-//			pos = (int)Math.round(slotInfoResults.get(i));
-//			bid = bidResults.get(i);
-//			posBidArray[pos].add(bid);
-//		}
-//
-//		for (int i = 1; i <= NUM_OF_PLAYERS; i++)
-//		{
-//			double avg = 0.0;
-//			double sum = 0.0;
-//			for (int j = 0; j < posBidArray[i].size(); j++)
-//			{
-//				if (i < posBidArray.length && null != posBidArray[i].get(j)){
-//					sum += posBidArray[i].get(j);
-//				}
-//			}
-//			avg = sum / (1 + posBidArray[i].size());
-//			avgBidPos.put(avg, (double)i);
-//		}
-//
-//		return avgBidPos;
-//	}
-	
 	private Double calcAvgFromArray(ArrayList<Double> array){
 		double avg = 0.0;
 		double sum = 0.0;
@@ -309,8 +274,8 @@ public class SmithBasicModeler extends Modeler {
 		if (true == logExist)
 		{
 			daySum = TAU_SIMDAYS + day;
-			LOG_FACTOR = 0.5;
-			CURR_FACTOR = 0.5;
+			LOG_FACTOR = 0.75;
+			CURR_FACTOR = 0.25;
 			if (avgBidImpByLog.containsKey(query.getQuery()) == false){
 				avgBidImpByLog.put(query.getQuery(), estimateImpByLog(simID-1, convertToQueryLogType(query.getQuery())));
 			}
