@@ -21,9 +21,14 @@ public class MyBasicEstimator extends Estimator
 	// where defined ?
 	double decay;
 	
-	protected static double GAMMA = 0.5;
-	protected static double DECAY_DEFAULT = 0.5;
+	protected static double GAMMA = 0.8;
+	protected static double DECAY_DEFAULT = 0.05;
 	protected Queue<MyBasicEstimatorQuery> querySpace;
+	
+	//LR
+	protected static int windowSize = 3;
+	protected static double DIFF = 0.25;
+	protected static int isBURST = 0;
 	
 	//builder
 	public MyBasicEstimator() 
@@ -48,11 +53,50 @@ public class MyBasicEstimator extends Estimator
 			query.nextDay(day);
 	}
 	
+	//LR
+	public double LinearRegression(double[] yArr, double[] xVals, int numDays)
+	{
+	   	double sumx = 0.001;
+		double sumy = 0.001;
+	   	for (int i = 0; i <numDays; i++)
+	   	{ 
+	   		sumx += xVals[i];
+	   		sumy += yArr[i];
+	   	}
+	   	   		
+	   	double xbar = sumx / numDays;
+	   	double ybar = sumy / numDays;
+	   	double xxbar = 0.001;
+	   	double xybar = 0.001;
+	   	double xdelta = 0.001;
+	   	double ydelta = 0.001;
+	    
+	   	for (int i = 0; i < numDays; i++) 
+	   	{
+	   		xdelta = (xVals[i] - xbar);
+	   		ydelta = (yArr[i] - ybar);
+	   		xxbar += Math.pow(xdelta,2);
+	   		xybar += xdelta * ydelta;
+		}
+
+		double beta1 = xybar / xxbar;
+		double beta0 = ybar - beta1 * xbar;
+	   	
+		//y = beta1*x + beta0
+		return (beta1*(numDays+2)+beta0);
+	}
+	
 	
 	//estimate and set clicks and conversions rate values 
 	public void handleQueryReport(QueryReport queryReport, int yday) 
 	{
 		int impressions;
+		
+		//LR
+		double[] estVals = new double[windowSize];
+		double[] realVals = new double[windowSize];
+		double des, lr;
+		isBURST = 0;
 		
 		for(MyBasicEstimatorQuery query : querySpace) 
 		{      	
@@ -74,18 +118,57 @@ public class MyBasicEstimator extends Estimator
 	        //set estimated conversions rate
 			query.estConvRate[yday+2] = decay*query.convRate[yday]+(1-decay)*(query.estConvRate[yday+1]+query.b1[yday+1]);
 			query.b1[yday+2] = GAMMA*(query.estConvRate[yday+2]-query.estConvRate[yday+1])+(1-GAMMA)*query.b1[yday+1];
-	        
-        	
+			
+			des = query.estConvRate[yday+2];
+			
+			//LR
+			if (yday>6)
+			{
+				for (int i=0; i<windowSize-1; i++)         
+				{
+					estVals[i]=query.estConvRate[yday-i];
+					realVals[i]=query.convRate[yday-i];		
+				}
+				lr = LinearRegression(estVals, realVals,windowSize);
+				//lr = query.estConvRate[yday+2];
+				
+				if (Math.abs(des - lr) > DIFF) 
+					isBURST = 1;
+	        	
+			}
+			
+			
 			//set estimated clicks rate
 			query.estClickRate[yday+2] = decay*query.clickRate[yday]+(1-decay)*(query.estClickRate[yday+1]+query.b2[yday+1]);
-			query.b2[yday+2] = GAMMA*(query.estClickRate[yday+2]-query.estClickRate[yday+1])+(1-GAMMA)*query.b2[yday+1];     	
+			query.b2[yday+2] = GAMMA*(query.estClickRate[yday+2]-query.estClickRate[yday+1])+(1-GAMMA)*query.b2[yday+1];
 			
+			des = query.estClickRate[yday+2];
+			
+			//LR
+			if (yday>6)
+			{
+				for (int i=0; i<windowSize-1; i++)         
+				{
+					estVals[i]=query.estClickRate[yday-i];
+					realVals[i]=query.clickRate[yday-i];		
+				}
+				lr = LinearRegression(estVals, realVals,windowSize);
+				//lr = query.estClickRate[yday+2];
+				
+				if (Math.abs(des - lr) > DIFF) 
+					isBURST = 1;
+			}
        	}
 	}
 	
 	
 	public void handleSalesReport(SalesReport salesReport, int yday) 
 	{
+		//LR
+		double[] estVals = new double[windowSize];
+		double[] realVals = new double[windowSize];
+		double des, lr;
+		isBURST = 0;
 		
 		for(MyBasicEstimatorQuery query : querySpace) 
 		{   
@@ -96,7 +179,25 @@ public class MyBasicEstimator extends Estimator
         	//set estimated sales
         	query.estSales[yday+2] = decay*query.sales[yday]+(1-decay)*(query.estSales[yday+1]+query.b3[yday+1]);
 			query.b3[yday+2] = GAMMA*(query.estSales[yday+2]-query.estSales[yday+1])+(1-GAMMA)*query.b3[yday+1];
+			
+			des = query.estSales[yday+2];
 
+			//LR
+			if (yday>6)
+			{
+				for (int i=0; i<windowSize-1; i++)         
+				{
+					estVals[i]=query.estSales[yday-i];
+					realVals[i]=query.sales[yday-i];		
+				}
+				lr = LinearRegression(estVals, realVals,windowSize);
+				//lr = query.estSales[yday+2];
+				
+				if (Math.abs(des - lr) > DIFF) 
+					isBURST = 1;
+			}
+			
+			
         	if (query.sales[yday]!=0)        
 				query.profitPerUnitSold[yday] = salesReport.getRevenue(query.getQuery())/((double)query.sales[yday]);        
 			else
@@ -172,6 +273,9 @@ public class MyBasicEstimator extends Estimator
 				
 				//set weight factor
 				weight1 = 1.0 / position;
+
+				if (isBURST == 1) 
+					weight1 = Math.pow(weight1, 2);
 				
 				if (position != 1.0) 
 					weight2 = 1 - weight1;
